@@ -7,7 +7,7 @@ class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
 
   @override
-  State<WelcomePage> createState() => _WelcomePageState();
+  State<WelcomePage> createState() => _WelcomePageState(); 
 }
 
 class _WelcomePageState extends State<WelcomePage> {

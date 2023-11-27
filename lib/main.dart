@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:money_management/features/presentation/pages/App/app.dart';
+import 'package:money_management/features/presentation/pages/Home/home.dart';
 import 'package:money_management/features/presentation/pages/Welcome/welcome.dart';
 
 void main() {
@@ -22,7 +23,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/welcome': (context)=> WelcomePage(),
-        '/': (context) => AppPage()
+        '/': (context) => HomePage()
       },
     );
   }
