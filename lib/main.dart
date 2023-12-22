@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:money_management/features/presentation/pages/App/app.dart';
 import 'package:money_management/features/presentation/pages/Home/home.dart';
 import 'package:money_management/features/presentation/pages/Welcome/welcome.dart';
+import 'package:money_management/features/presentation/pages/wrapper.dart';
 
 void main() {
   runApp(const MyApp());
@@ -23,7 +24,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/welcome': (context)=> WelcomePage(),
-        '/': (context) => HomePage()
+        '/': (context) => Wrapper()
       },
     );
   }

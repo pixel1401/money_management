@@ -1,5 +1,7 @@
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
+
 class HexColor extends Color {
   static int _getColorFromHex(String hexColor) {
     hexColor = hexColor.toUpperCase().replaceAll("#", "");
@@ -37,3 +39,8 @@ List<String> days = [
   'Saturday',
   'Sunday'
 ];
+
+
+SizedBox Space(double? heightArg  , double? widthArg  ) {
+  return SizedBox(height: heightArg , width: widthArg,);
+}

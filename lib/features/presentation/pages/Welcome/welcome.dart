@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:money_management/core/helpers/helpers.dart';
-import 'package:money_management/features/presentation/widgets/ui/Button/button.dart';
+import 'package:money_management/features/presentation/shared/ui/Button/button.dart';
 
 class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
@@ -57,7 +57,7 @@ class _WelcomePageState extends State<WelcomePage> {
                         alignment: Alignment.center,
                         child: Button(
                           onPress: () {
-                            Navigator.pop(context);
+                              Navigator.popAndPushNamed(context, '/');
                           },
                           text: 'Continue',
                           styleBtn: ElevatedButton.styleFrom(

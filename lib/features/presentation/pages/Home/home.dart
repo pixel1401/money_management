@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:money_management/core/helpers/helpers.dart';
+import 'package:money_management/features/presentation/widgets/bottom_navigation_bar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -9,74 +10,211 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Container(
-            constraints:
-                BoxConstraints(minHeight: MediaQuery.of(context).size.height),
-            padding: EdgeInsets.symmetric(horizontal: 10 , vertical: 10),
-            child: Column(
+    return  Align(
+      alignment: Alignment.topCenter,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        decoration: const ShapeDecoration(
+          gradient: LinearGradient(
+            begin: Alignment(-0.06, -1.00),
+            end: Alignment(0.06, 1),
+            colors: [Color(0xFFFFF6E5), Color(0x00F7ECD7)],
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(32),
+              bottomRight: Radius.circular(32),
+            ),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // HEADER
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // HEADER
-                Row(
-                  children: [
-                    Text(
-                      '${months[DateTime.now().month - 1]} ${DateTime.now().day}\n${days[DateTime.now().weekday - 1]}',
-                      style: TextStyle(
-                        color: Color(0xFF0D0000),
-                        fontSize: 14,
-                        fontFamily: 'Inter',
-                        fontWeight: FontWeight.w400,
-                        height: 0,
-                      ),
-                    ),
-                    Container(
-                      width: 32,
-                      height: 32,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Container(
-                            width: 32,
-                            height: 32,
-                            decoration: ShapeDecoration(
-                              image: DecorationImage(
-                                image: NetworkImage(
-                                    "https://via.placeholder.com/32x32"),
-                                fit: BoxFit.fill,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(24),
-                              ),
-                              shadows: [
-                                BoxShadow(
-                                  color: Color(0xFFAD00FF),
-                                  blurRadius: 0,
-                                  offset: Offset(0, 0),
-                                  spreadRadius: 3,
-                                ),
-                                BoxShadow(
-                                  color: Color(0xFFF5F5F5),
-                                  blurRadius: 0,
-                                  offset: Offset(0, 0),
-                                  spreadRadius: 2,
-                                )
-                              ],
-                            ),
+                Text(
+                  '${months[DateTime.now().month - 1]} ${DateTime.now().day}\n${days[DateTime.now().weekday - 1]}',
+                  style: const TextStyle(
+                    color: Color(0xFF0D0000),
+                    fontSize: 14,
+                    fontFamily: 'Inter',
+                    fontWeight: FontWeight.w400,
+                    height: 0,
+                  ),
+                ),
+                Container(
+                  width: 32,
+                  height: 32,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: ShapeDecoration(
+                          image: DecorationImage(
+                            image: NetworkImage(
+                                "https://via.placeholder.com/32x32"),
+                            fit: BoxFit.fill,
                           ),
-                        ],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          shadows: [
+                            BoxShadow(
+                              color: Color(0xFFAD00FF),
+                              blurRadius: 0,
+                              offset: Offset(0, 0),
+                              spreadRadius: 3,
+                            ),
+                            BoxShadow(
+                              color: Color(0xFFF5F5F5),
+                              blurRadius: 0,
+                              offset: Offset(0, 0),
+                              spreadRadius: 2,
+                            )
+                          ],
+                        ),
                       ),
-                    )
-                  ],
+                    ],
+                  ),
                 )
               ],
             ),
+            Divider(),
+            Space(20, 0),
+            Text(
+              'Account Balance',
+              style: TextStyle(
+                color: Color(0xFF90909F),
+                fontSize: 14,
+                fontFamily: 'Inter',
+                fontWeight: FontWeight.w500,
+                height: 0,
+              ),
+            ),
+            Text(
+              '9400.0',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Color(0xFF161719),
+                fontSize: 40,
+                fontFamily: 'Inter',
+                fontWeight: FontWeight.w600,
+                height: 0,
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildBtn(),
+                _buildBtn(false),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  
+  }
+
+  TextButton _buildBtn([bool isExpenses = true]) {
+    return TextButton(
+      onPressed: () {},
+      child: Container(
+        width: 164,
+        height: 80,
+        decoration: ShapeDecoration(
+          color: isExpenses ? Color(0xFFFD3C4A) : HexColor('#00A86B'),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(28),
           ),
+        ),
+        child: Stack(
+          children: [
+            Positioned(
+              left: 72,
+              top: 18,
+              child: Text(
+                'Expenses',
+                style: TextStyle(
+                  color: Color(0xFFFBFBFB),
+                  fontSize: 14,
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.w500,
+                  height: 0,
+                ),
+              ),
+            ),
+            Positioned(
+              left: 72,
+              top: 39,
+              child: Text(
+                '11200',
+                style: TextStyle(
+                  color: Color(0xFFFBFBFB),
+                  fontSize: 22,
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.w600,
+                  height: 0,
+                ),
+              ),
+            ),
+            Positioned(
+              left: 16,
+              top: 17,
+              child: Container(
+                width: 48,
+                height: 48,
+                decoration: ShapeDecoration(
+                  color: Color(0xFFFBFBFB),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      left: 8.20,
+                      top: 8,
+                      child: Container(
+                        width: 32,
+                        height: 32,
+                        padding: const EdgeInsets.only(
+                          top: 1.99,
+                          left: 4,
+                          right: 4,
+                          bottom: 2,
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        decoration: BoxDecoration(),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.exit_to_app,
+                              color: isExpenses
+                                  ? Color(0xFFFD3C4A)
+                                  : HexColor('#00A86B'),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
