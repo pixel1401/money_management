@@ -114,8 +114,12 @@ class _HomePageState extends State<HomePage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildBtn(),
-                _buildBtn(false),
+                _buildBtn(() {
+                  Navigator.pushNamed(context, '/addTrans');
+                }),
+                _buildBtn( () => {
+
+                } ,false),
               ],
             )
           ],
@@ -125,9 +129,11 @@ class _HomePageState extends State<HomePage> {
   
   }
 
-  TextButton _buildBtn([bool isExpenses = true]) {
+  TextButton _buildBtn( Function onTap , [bool isExpenses = true]) {
     return TextButton(
-      onPressed: () {},
+      onPressed: () {
+        onTap();
+      },
       child: Container(
         width: 164,
         height: 80,
