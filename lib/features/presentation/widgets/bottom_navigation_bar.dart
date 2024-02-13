@@ -30,6 +30,10 @@ class BottomNavigationBarWrap extends StatelessWidget {
             icon: Icon(Icons.first_page),
             label: 'Welcome',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Auth',
+          ),
         ],
         currentIndex: selectedIndex,
         onTap: onItemTapped,

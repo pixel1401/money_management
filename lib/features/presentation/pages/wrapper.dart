@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:money_management/features/presentation/pages/Auth/auth.dart';
 import 'package:money_management/features/presentation/pages/Home/home.dart';
 import 'package:money_management/features/presentation/pages/Transaction/transaction.dart';
 import 'package:money_management/features/presentation/widgets/bottom_navigation_bar.dart';
@@ -19,6 +20,7 @@ class _WrapperState extends State<Wrapper> {
       case 3:
         Navigator.popAndPushNamed(context, '/welcome');
         break;
+    
       default:
     }
   }
@@ -28,6 +30,7 @@ class _WrapperState extends State<Wrapper> {
     Transaction(),
     HomePage(),
     HomePage(),
+    AuthPage(),
   ];
 
   @override
