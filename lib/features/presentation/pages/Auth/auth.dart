@@ -13,9 +13,12 @@ class _AuthPageState extends State<AuthPage> {
 
 
   Future<void> signIn () async {
-    GoogleSignIn(
-      clientId: '484095062673-bubg4k1m93h9n0va5q3299rd0ol33kto.apps.googleusercontent.com'
+    print('WHAT');
+    var data = await GoogleSignIn(
+      // clientId: '484095062673-bubg4k1m93h9n0va5q3299rd0ol33kto.apps.googleusercontent.com'
     ).signIn();
+
+    print(data);
   }
 
 
