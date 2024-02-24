@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:money_management/core/api/google.dart';
 import 'package:money_management/features/presentation/shared/ui/Button/button.dart';
 
 class AuthPage extends StatefulWidget {
@@ -10,17 +11,14 @@ class AuthPage extends StatefulWidget {
 }
 
 class _AuthPageState extends State<AuthPage> {
-
-
-  Future<void> signIn () async {
-    print('WHAT');
-    var data = await GoogleSignIn(
-      // clientId: '484095062673-bubg4k1m93h9n0va5q3299rd0ol33kto.apps.googleusercontent.com'
-    ).signIn();
-
+  Future<void> signIn() async {
+    var data = await Google().signIn();
     print(data);
   }
 
+  Future<void> signOut() async {
+    var data = await Google().signOut();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,10 +27,18 @@ class _AuthPageState extends State<AuthPage> {
         child: Column(
           children: [
             Text("Google"),
-            Button(onPress: () {
-              signIn();
-            },
-            text: 'Sign in Google',)
+            Button(
+              onPress: () {
+                signIn();
+              },
+              text: 'Sign in Google',
+            ),
+            Button(
+              onPress: () {
+                signOut();
+              },
+              text: 'Sign out',
+            )
           ],
         ),
       ),
