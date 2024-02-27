@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:money_management/features/presentation/pages/AddTrans/addTrans.dart';
 import 'package:money_management/features/presentation/pages/App/app.dart';
 import 'package:money_management/features/presentation/pages/Auth/auth.dart';
-import 'package:money_management/features/presentation/pages/Home/home.dart';
 import 'package:money_management/features/presentation/pages/Welcome/welcome.dart';
 import 'package:money_management/features/presentation/pages/wrapper.dart';
+import 'package:money_management/injection_container.dart' as di;
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await di.init();
   runApp(const MyApp());
 }
 

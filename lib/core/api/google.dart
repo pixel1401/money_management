@@ -10,8 +10,8 @@ import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sig
 
 class Google {
   static GoogleSignIn google = GoogleSignIn(
-      // clientId:
-      //     '484095062673-bubg4k1m93h9n0va5q3299rd0ol33kto.apps.googleusercontent.com',
+      clientId:
+          '484095062673-bubg4k1m93h9n0va5q3299rd0ol33kto.apps.googleusercontent.com',
       scopes: [
         drive.DriveApi.driveScriptsScope,
         sheets.SheetsApi.spreadsheetsScope

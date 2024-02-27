@@ -28,8 +28,8 @@ class _TransactionState extends State<Transaction> {
   
   try {
     var credentials =  (await Google().anyMethod().authenticatedClient())!;
-    
     var client = sheets.SheetsApi(credentials);
+    
     var spreadsheet = sheets.Spreadsheet();
     spreadsheet.properties =
         sheets.SpreadsheetProperties(title: 'My Spreadsheet5821');
