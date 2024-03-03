@@ -7,7 +7,7 @@ class UserAuthenticatedClient implements UseCase<AuthClient?, void> {
   UserAuthenticatedClient({required this.userRepository});
 
   @override
-  Future<AuthClient?> call({void params}) async {
+  Future<AuthClient?> call(void params) async {
     return await userRepository.authenticatedClient();
   }
 }

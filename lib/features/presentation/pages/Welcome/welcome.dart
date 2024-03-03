@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
 import 'package:money_management/core/helpers/helpers.dart';
 import 'package:money_management/features/presentation/shared/ui/Button/button.dart';
@@ -57,7 +58,7 @@ class _WelcomePageState extends State<WelcomePage> {
                         alignment: Alignment.center,
                         child: Button(
                           onPress: () {
-                              Navigator.popAndPushNamed(context, '/');
+                              context.go('/');
                           },
                           text: 'Continue',
                           styleBtn: ElevatedButton.styleFrom(

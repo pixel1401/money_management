@@ -1,7 +1,6 @@
 import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:googleapis/authorizedbuyersmarketplace/v1.dart';
-import 'package:money_management/core/api/google.dart';
 import 'package:money_management/features/presentation/shared/ui/Button/button.dart';
 import 'package:googleapis/sheets/v4.dart' as sheets;
 import 'package:googleapis_auth/auth_io.dart';
@@ -17,33 +16,33 @@ class Transaction extends StatefulWidget {
 class _TransactionState extends State<Transaction> {
   final items = List<String>.generate(20, (i) => "Item ${i + 1}");
 
-  connectSheets() async {
-    var data = await Google().signIn();
-    // var AuthCLien = await data?.authentication;
-    // print(AuthCLien);
-    print(data);
+  // connectSheets() async {
+  //   var data = await Google().signIn();
+  //   // var AuthCLien = await data?.authentication;
+  //   // print(AuthCLien);
+  //   print(data);
 
-    // String clientId = '';  
-    // String apiKey = 'AIzaSyA66asDwqH_gAng5n9CsurH8A6VFC7gizI';
+  //   // String clientId = '';  
+  //   // String apiKey = 'AIzaSyA66asDwqH_gAng5n9CsurH8A6VFC7gizI';
   
-  try {
-    var credentials =  (await Google().anyMethod().authenticatedClient())!;
-    var client = sheets.SheetsApi(credentials);
+  // try {
+  //   var credentials =  (await Google().anyMethod().authenticatedClient())!;
+  //   var client = sheets.SheetsApi(credentials);
     
-    var spreadsheet = sheets.Spreadsheet();
-    spreadsheet.properties =
-        sheets.SpreadsheetProperties(title: 'My Spreadsheet5821');
-    spreadsheet.sheets = [
-      sheets.Sheet(properties: sheets.SheetProperties(title: 'Sheet12'))
-    ];
+  //   var spreadsheet = sheets.Spreadsheet();
+  //   spreadsheet.properties =
+  //       sheets.SpreadsheetProperties(title: 'My Spreadsheet5821');
+  //   spreadsheet.sheets = [
+  //     sheets.Sheet(properties: sheets.SheetProperties(title: 'Sheet12'))
+  //   ];
 
-    await client.spreadsheets.create(spreadsheet);
-    print('Spreadsheet created successfully!');
-  } catch (e) {
-    print('${e}  ERROR');
-  }
+  //   await client.spreadsheets.create(spreadsheet);
+  //   print('Spreadsheet created successfully!');
+  // } catch (e) {
+  //   print('${e}  ERROR');
+  // }
     
-  }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +50,7 @@ class _TransactionState extends State<Transaction> {
       children: [
         Button(
             onPress: () {
-              connectSheets();
+              // connectSheets();
             },
             text: 'Connect'),
         Container(

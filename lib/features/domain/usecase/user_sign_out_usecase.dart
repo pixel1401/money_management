@@ -7,7 +7,7 @@ class UserSignOut implements UseCase<GoogleSignInAccount?, void> {
   UserSignOut({required this.userRepository});
 
   @override
-  Future<GoogleSignInAccount?> call({void params}) async {
+  Future<GoogleSignInAccount?> call(void params) async {
     return await userRepository.userSignOut();
   }
 }

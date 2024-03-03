@@ -6,7 +6,7 @@ class UserIsAuth implements UseCase<bool?, void> {
   UserIsAuth({required this.userRepository});
 
   @override
-  Future<bool> call({void params}) async {
+  Future<bool> call(void params) async {
     return await userRepository.userIsAuth();
   }
 }

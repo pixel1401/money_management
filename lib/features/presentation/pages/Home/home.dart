@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:money_management/core/helpers/helpers.dart';
-import 'package:money_management/features/presentation/widgets/bottom_navigation_bar.dart';
+import 'package:money_management/features/presentation/bloc/user/user_cubit.dart';
+import 'package:money_management/features/presentation/bloc/user/user_state.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -10,132 +12,137 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
   @override
   Widget build(BuildContext context) {
-    return  Align(
-      alignment: Alignment.topCenter,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-        decoration: const ShapeDecoration(
-          gradient: LinearGradient(
-            begin: Alignment(-0.06, -1.00),
-            end: Alignment(0.06, 1),
-            colors: [Color(0xFFFFF6E5), Color(0x00F7ECD7)],
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(32),
-              bottomRight: Radius.circular(32),
+    return BlocBuilder<UserCubit, UserState>(builder: (context, state) {
+      if (state is Authorized) {
+        return Align(
+          alignment: Alignment.topCenter,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            decoration: const ShapeDecoration(
+              gradient: LinearGradient(
+                begin: Alignment(-0.06, -1.00),
+                end: Alignment(0.06, 1),
+                colors: [Color(0xFFFFF6E5), Color(0x00F7ECD7)],
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(32),
+                  bottomRight: Radius.circular(32),
+                ),
+              ),
             ),
-          ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // HEADER
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
+                // HEADER
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '${months[DateTime.now().month - 1]} ${DateTime.now().day}\n${days[DateTime.now().weekday - 1]}',
+                      style: const TextStyle(
+                        color: Color(0xFF0D0000),
+                        fontSize: 14,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w400,
+                        height: 0,
+                      ),
+                    ),
+                    Container(
+                      width: 32,
+                      height: 32,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 32,
+                            height: 32,
+                            decoration: ShapeDecoration(
+                              image: DecorationImage(
+                                image:
+                                    NetworkImage(state.userData.photoUrl ?? ''),
+                                fit: BoxFit.fill,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                              shadows: const [
+                                BoxShadow(
+                                  color: Color(0xFFAD00FF),
+                                  blurRadius: 0,
+                                  offset: Offset(0, 0),
+                                  spreadRadius: 3,
+                                ),
+                                BoxShadow(
+                                  color: Color(0xFFF5F5F5),
+                                  blurRadius: 0,
+                                  offset: Offset(0, 0),
+                                  spreadRadius: 2,
+                                )
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+                Divider(),
+                Space(20, 0),
                 Text(
-                  '${months[DateTime.now().month - 1]} ${DateTime.now().day}\n${days[DateTime.now().weekday - 1]}',
-                  style: const TextStyle(
-                    color: Color(0xFF0D0000),
+                  'Account Balance',
+                  style: TextStyle(
+                    color: Color(0xFF90909F),
                     fontSize: 14,
                     fontFamily: 'Inter',
-                    fontWeight: FontWeight.w400,
+                    fontWeight: FontWeight.w500,
                     height: 0,
                   ),
                 ),
-                Container(
-                  width: 32,
-                  height: 32,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: ShapeDecoration(
-                          image: DecorationImage(
-                            image: NetworkImage(
-                                "https://via.placeholder.com/32x32"),
-                            fit: BoxFit.fill,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          shadows: [
-                            BoxShadow(
-                              color: Color(0xFFAD00FF),
-                              blurRadius: 0,
-                              offset: Offset(0, 0),
-                              spreadRadius: 3,
-                            ),
-                            BoxShadow(
-                              color: Color(0xFFF5F5F5),
-                              blurRadius: 0,
-                              offset: Offset(0, 0),
-                              spreadRadius: 2,
-                            )
-                          ],
-                        ),
-                      ),
-                    ],
+                Text(
+                  '9400.0',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Color(0xFF161719),
+                    fontSize: 40,
+                    fontFamily: 'Inter',
+                    fontWeight: FontWeight.w600,
+                    height: 0,
                   ),
-                )
-              ],
-            ),
-            Divider(),
-            Space(20, 0),
-            Text(
-              'Account Balance',
-              style: TextStyle(
-                color: Color(0xFF90909F),
-                fontSize: 14,
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w500,
-                height: 0,
-              ),
-            ),
-            Text(
-              '9400.0',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Color(0xFF161719),
-                fontSize: 40,
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w600,
-                height: 0,
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildBtn(() {
-                  Navigator.pushNamed(context, '/addTrans');
-                }),
-                _buildBtn( () => {
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // _buildBtn(() {
+                    //   Navigator.pushNamed(context, '/addTrans');
+                    // }),
+                    // _buildBtn( () => {
 
-                } ,false),
+                    // } ,false),
+                  ],
+                ),
+                // Text(context.read<UserCubit>().state )
               ],
-            )
-          ],
-        ),
-      ),
-    );
-  
+            ),
+          ),
+        );
+      } else {
+        return const SizedBox();
+      }
+    });
   }
 
-  TextButton _buildBtn( Function onTap , [bool isExpenses = true]) {
+  TextButton _buildBtn(Function onTap, [bool isExpenses = true]) {
     return TextButton(
       onPressed: () {
         onTap();
       },
       child: Container(
-        width: 164,
+        width: 150,
         height: 80,
         decoration: ShapeDecoration(
           color: isExpenses ? Color(0xFFFD3C4A) : HexColor('#00A86B'),

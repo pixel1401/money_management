@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:money_management/core/api/google.dart';
 import 'package:money_management/features/presentation/shared/ui/Button/button.dart';
 
 class AuthPage extends StatefulWidget {
@@ -12,12 +11,9 @@ class AuthPage extends StatefulWidget {
 
 class _AuthPageState extends State<AuthPage> {
   Future<void> signIn() async {
-    var data = await Google().signIn();
-    print(data);
   }
 
   Future<void> signOut() async {
-    var data = await Google().signOut();
   }
 
   @override
