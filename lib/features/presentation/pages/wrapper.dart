@@ -15,14 +15,15 @@ class _WrapperState extends State<Wrapper> {
 
   void handleBottomWrap(int index) {
     setState(() => {selectIndex = index});
+    print(index);
     switch (selectIndex) {
-      case 1:
+      case 0:
         context.go('/');
+        break;
+      case 1:
+        context.go('/trans');
         break;
       case 2:
-        context.go('/');
-        break;
-      case 3:
         context.go('/welcome');
         break;
       case 4:
@@ -31,8 +32,6 @@ class _WrapperState extends State<Wrapper> {
     }
   }
 
-  
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,8 +39,15 @@ class _WrapperState extends State<Wrapper> {
         child: Container(
           constraints:
               BoxConstraints(maxHeight: MediaQuery.of(context).size.height),
+          padding: EdgeInsets.symmetric(horizontal: 10),
           child: widget.child,
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          context.go('/trans/add');
+        },
+        child: const Icon(Icons.add),
       ),
       bottomNavigationBar: BottomNavigationBarWrap(
           selectedIndex: selectIndex, onItemTapped: handleBottomWrap),

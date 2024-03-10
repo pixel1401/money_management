@@ -40,7 +40,9 @@ List<String> days = [
   'Sunday'
 ];
 
-
-SizedBox Space(double? heightArg  , double? widthArg  ) {
-  return SizedBox(height: heightArg , width: widthArg,);
+SizedBox Space([double? heightArg, double? widthArg]) {
+  return SizedBox(
+    height: heightArg,
+    width: widthArg,
+  );
 }

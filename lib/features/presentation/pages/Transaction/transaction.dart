@@ -1,9 +1,8 @@
-import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:googleapis/authorizedbuyersmarketplace/v1.dart';
+import 'package:go_router/go_router.dart';
 import 'package:money_management/features/presentation/shared/ui/Button/button.dart';
-import 'package:googleapis/sheets/v4.dart' as sheets;
-import 'package:googleapis_auth/auth_io.dart';
+
+import 'components/transaction_card.dart';
 
 
 class Transaction extends StatefulWidget {
@@ -50,30 +49,21 @@ class _TransactionState extends State<Transaction> {
       children: [
         Button(
             onPress: () {
-              // connectSheets();
+              context.go('/trans/add');
             },
-            text: 'Connect'),
-        Container(
-          height: 200,
-          child: ListView.builder(
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              final item = items[index];
-              return Dismissible(
-                // Specify the direction to swipe and delete
-                direction: DismissDirection.endToStart,
-                key: Key(item),
-                onDismissed: (direction) {
-                  // Removes that item the list on swipwe
-                  setState(() {
-                    items.removeAt(index);
-                  });
-                  // Shows the information on Snackbar
-                },
-                background: Container(color: Colors.red),
-                child: ListTile(title: Text('$item')),
-              );
-            },
+            text: 'Add'),
+        Expanded(
+          child: Container(
+            child: ListView.builder(
+              itemCount: items.length,
+              itemBuilder: (context, index) {
+                final item = items[index];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: TransactionCard(),
+                );
+              },
+            ),
           ),
         ),
       ],
@@ -81,5 +71,4 @@ class _TransactionState extends State<Transaction> {
   }
 }
 
-const scopes = [sheets.SheetsApi.spreadsheetsScope];
-const prompt = 'select_account';
+

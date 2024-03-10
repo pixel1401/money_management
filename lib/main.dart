@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:googleapis_auth/googleapis_auth.dart';
+import 'package:money_management/config/theme/theme.dart';
+import 'package:money_management/features/presentation/bloc/sheet/sheet_cubit.dart';
 import 'package:money_management/features/presentation/bloc/user/user_cubit.dart';
+import 'package:money_management/features/presentation/bloc/user/user_state.dart';
 import 'package:money_management/features/presentation/pages/AddTrans/addTrans.dart';
 import 'package:money_management/features/presentation/pages/Auth/auth.dart';
 import 'package:money_management/features/presentation/pages/Welcome/welcome.dart';
@@ -15,7 +19,6 @@ void main() async {
   runApp(const MyApp());
 }
 
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -26,16 +29,26 @@ class MyApp extends StatelessWidget {
         BlocProvider<UserCubit>(
           create: (BuildContext context) => sl<UserCubit>()..getUserData(),
         ),
-      ],
-      child: MaterialApp.router(
-        routerConfig: router,
-        title: 'Money Management',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          useMaterial3: true,
+        BlocProvider(
+          create: (BuildContext context) => sl<SheetCubit>(),
         ),
-        // home: const WelcomePage(),
+      ],
+      child: BlocListener<UserCubit, UserState>(
+        listener: (context, state) {
+          if (state is Authorized) {
+            final AuthClient? authClient = state.authClient;
+            if (authClient != null) {
+              BlocProvider.of<SheetCubit>(context).initSheet(authClient);
+            }
+          }
+        },
+        child: MaterialApp.router(
+          routerConfig: router,
+          title: 'Money Management',
+          debugShowCheckedModeBanner: false,
+          theme: theme(),
+          // home: const WelcomePage(),
+        ),
       ),
     );
   }
