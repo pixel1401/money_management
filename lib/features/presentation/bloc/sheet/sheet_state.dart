@@ -11,16 +11,19 @@ class SheetInitial extends SheetState {}
 class SheetSuccess extends SheetState {
   SheetsApi? sheetsApi;
   DriveApi? driveApi;
+  Spreadsheet? currentFile;
 
-  SheetSuccess([this.sheetsApi , this.driveApi]);
+  SheetSuccess([this.sheetsApi , this.driveApi , this.currentFile]);
 
   SheetSuccess copyWith({
     SheetsApi? sheetsApi,
-    DriveApi? driveApi
+    DriveApi? driveApi,
+    Spreadsheet? currentFile
   }) {
     return SheetSuccess(
       sheetsApi ?? this.sheetsApi,
-      driveApi ?? this.driveApi
+      driveApi ?? this.driveApi,
+      currentFile ?? this.currentFile
     );
   }
 }

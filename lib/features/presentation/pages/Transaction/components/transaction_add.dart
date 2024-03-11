@@ -25,35 +25,11 @@ class TransactionStateAdd extends State<TransactionAdd> {
   String dropdownValue = list.first;
 
   handleSubmit(BuildContext context) async {
-    // context.read<SheetCubit>().state.add(_formKey.currentState!.value);
+    final sheetState = context.read<SheetCubit>().state;
 
-
-
-
-
-    var spreadsheet = sheets.Spreadsheet();
-    spreadsheet.properties =
-        sheets.SpreadsheetProperties(title: 'Money_Management');
-    spreadsheet.sheets = [
-      sheets.Sheet(properties: sheets.SheetProperties(title: 'Sheet12'))
-    ];
-
-    final sheetSuccessClient = context.read<SheetCubit>().state;
-    if(sheetSuccessClient is SheetSuccess && sheetSuccessClient.driveApi != null){
-
-      var file = sheetSuccessClient.driveApi!.files.list(q: 'name="Money_Management"').then((value) => {
-        print(value)
-      }).catchError((err) => {
-        print(err)
-      });
-
-      print(file);
-      
-      // var data = await sheetSuccessClient.sheetsApi.spreadsheets.get(spreadsheetId);
-      // data.
+    if(sheetState is SheetSuccess){
+      context.read<SheetCubit>().checkFile();
     }
-    
-
   }
 
   @override
