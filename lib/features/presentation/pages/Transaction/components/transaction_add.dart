@@ -2,13 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:googleapis/sheets/v4.dart' as sheets;
-import 'package:googleapis/drive/v3.dart' as drive;
+import 'package:googleapis/sheets/v4.dart';
 import 'package:money_management/core/helpers/helpers.dart';
 import 'package:money_management/features/presentation/bloc/sheet/sheet_cubit.dart';
-import 'package:money_management/features/presentation/bloc/sheet/sheet_state.dart';
+
 import 'package:money_management/features/presentation/shared/ui/Button/button.dart';
 import 'package:money_management/features/presentation/shared/ui/Text/text.dart';
+
+
+
+  // var spreadsheet = sheets.Spreadsheet();
+      // spreadsheet.properties =
+      //     sheets.SpreadsheetProperties(title: 'My Spreadsheet5821');
+      // spreadsheet.sheets = [
+      //   sheets.Sheet(properties: sheets.SheetProperties(title: 'Sheet12'))
+      // ];
+
+      // await client.spreadsheets.create(spreadsheet);
+
+
 
 List<String> list = <String>['One', 'Two', 'Three', 'Four'];
 
@@ -27,8 +39,51 @@ class TransactionStateAdd extends State<TransactionAdd> {
   handleSubmit(BuildContext context) async {
     final sheetState = context.read<SheetCubit>().state;
 
-    if(sheetState is SheetSuccess){
-      context.read<SheetCubit>().checkFile();
+    if (sheetState is SheetSuccess) {
+      
+      await context.read<SheetCubit>().pushDataSpreadSheet();
+
+      BatchUpdateSpreadsheetRequest request =
+          BatchUpdateSpreadsheetRequest(requests: [
+        Request(
+            updateCells: UpdateCellsRequest(
+          fields: "*",
+          start: GridCoordinate(
+              columnIndex: 2,
+              rowIndex: 5,
+              sheetId: sheetState.currentFile!.sheets?[0].properties?.sheetId),
+          rows: [
+            RowData(
+              values: [
+                CellData(
+                    userEnteredValue: ExtendedValue(
+                  stringValue: "New Value 111",
+                )),
+                CellData(
+                    userEnteredValue: ExtendedValue(
+                  stringValue: "New Value 222",
+                )),
+                CellData(
+                    userEnteredValue:
+                        ExtendedValue(stringValue: "New Value 333")),
+              ],
+            ),
+            RowData(values: [
+              CellData(
+                  userEnteredValue: ExtendedValue(stringValue: 'VAlue2111')),
+              CellData(
+                  userEnteredValue: ExtendedValue(stringValue: 'VAlue28788')),
+            ])
+          ],
+        ))
+      ]);
+
+      // var res = await sheetState.sheetsApi!.spreadsheets
+      //     .batchUpdate(request, sheetState.spreadsheetId!, $fields: "*");
+
+      print(sheetState.currentFile);
+      print(sheetState.spreadsheetId);
+      // print(res);
     }
   }
 
@@ -126,8 +181,9 @@ class TransactionStateAdd extends State<TransactionAdd> {
                     // debugPrint(_formKey.currentState?.value.toString());
 
                     // _formKey.currentState?.validate();
-                    if(_formKey.currentState?.validate() ?? false) {
-                      debugPrint(_formKey.currentState?.instantValue.toString());
+                    if (_formKey.currentState?.validate() ?? false) {
+                      debugPrint(
+                          _formKey.currentState?.instantValue.toString());
                       handleSubmit(context);
                     }
                     // Navigator.pop(context);
