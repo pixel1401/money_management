@@ -82,7 +82,7 @@ class SheetCubit extends Cubit<SheetState> {
       if (currentState.currentFile?.sheets != null) {
         for (var a in currentState.currentFile!.sheets!) {
           if (a.properties?.title != null) {
-            sheetNames.add(a.properties!.title! );
+            sheetNames.add(a.properties!.title!);
           }
         }
       }
@@ -102,27 +102,70 @@ class SheetCubit extends Cubit<SheetState> {
     }
   }
 
-  Future<void> clearEmptySheetValue() async {
+  Future<void> clearEmptySheetRowsValue() async {
     var currentState = state;
     if (currentState is! SheetSuccess) return;
 
     var currentStateSuccess = currentState as SheetSuccess;
     if (currentStateSuccess.sheetsValueRange == null) return;
 
+    List<Request>? requestsForDelete = [];
+
     for (var a in currentStateSuccess.sheetsValueRange!) {
-        int rowIndexLast = a.values?.length ?? 0;
-        for(var value in a.values!){
-          if(value != null) {
-            if(value.isEmpty){
-              
-            }
-          }
+      int rowIndexLast = a.values?.length ?? 0;
+      int indexList = currentStateSuccess.sheetsValueRange!.indexOf(a);
+      if (a.values == null) continue;
+
+      for (var i = 0; i < a.values!.length; i++) {
+        var valueItem = a.values![i];
+
+        if (valueItem == null) continue;
+        if (valueItem.length < 4) {
+          var itemProperties =
+              currentState.currentFile?.sheets?[indexList].properties;
+          if (itemProperties?.title != a.sheetName) break;
+          requestsForDelete.add(Request(
+              deleteDimension: DeleteDimensionRequest(
+                  range: DimensionRange(
+                      sheetId: itemProperties?.sheetId,
+                      dimension: "ROWS",
+                      startIndex: i,
+                      endIndex: i + 1))));
         }
+      }
     }
 
+    if (requestsForDelete.length > 0) {
+      BatchUpdateSpreadsheetRequest request =
+          BatchUpdateSpreadsheetRequest(requests: requestsForDelete);
+      await currentStateSuccess.sheetsApi!.spreadsheets.batchUpdate(
+        request,
+        currentStateSuccess.spreadsheetId ?? '',
+      );
+    }
   }
 
-  Future<void> pushDataSpreadSheet() async {
+  Future<void> deleteSheetRow({required int sheetId, required int index}) async {
+    var currentState = state;
+    if (currentState is! SheetSuccess) return;
+
+    Request requestsForDelete = Request(
+        deleteDimension: DeleteDimensionRequest(
+            range: DimensionRange(
+                sheetId: sheetId,
+                dimension: "ROWS",
+                startIndex: index,
+                endIndex: index + 1)));
+
+    BatchUpdateSpreadsheetRequest request =
+        BatchUpdateSpreadsheetRequest(requests: [requestsForDelete]);
+    await currentState.sheetsApi!.spreadsheets.batchUpdate(
+      request,
+      currentState.spreadsheetId ?? '',
+    );
+  }
+
+  Future<void> pushDataSpreadSheet({required List<RowData> rows}) async {
     if (state is! SheetSuccess) return;
 
     var currentState = state as SheetSuccess;
@@ -133,9 +176,7 @@ class SheetCubit extends Cubit<SheetState> {
         int rowIndexLast = a.values?.length ?? 0;
 
         BatchUpdateSpreadsheetRequest request =
-            BatchUpdateSpreadsheetRequest(
-              
-              requests: [
+            BatchUpdateSpreadsheetRequest(requests: [
           Request(
               updateCells: UpdateCellsRequest(
             fields: "*",
@@ -144,31 +185,17 @@ class SheetCubit extends Cubit<SheetState> {
                 rowIndex: rowIndexLast,
                 sheetId:
                     currentState.currentFile!.sheets?[0].properties?.sheetId),
-            rows: [
-              RowData(
-                values: [
-                  CellData(
-                      userEnteredValue: ExtendedValue(
-                    stringValue: "New Value 111",
-                  )),
-                  CellData(
-                      userEnteredValue: ExtendedValue(
-                    stringValue: "New Value 222",
-                  )),
-                  CellData(
-                      userEnteredValue:
-                          ExtendedValue(stringValue: "New Value 333")),
-                ],
-              ),
-              
-            ],
+            rows: rows,
           ))
         ]);
 
         var res = await currentState.sheetsApi!.spreadsheets
             .batchUpdate(request, currentState.spreadsheetId!, $fields: "*");
-        emit(currentState.copyWith(currentFile: res.updatedSpreadsheet , spreadsheetId: res.spreadsheetId));
+        emit(currentState.copyWith(
+            currentFile: res.updatedSpreadsheet,
+            spreadsheetId: res.spreadsheetId));
         await getDataSpreadSheet();
+        await clearEmptySheetRowsValue();
       }
     }
   }

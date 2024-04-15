@@ -9,18 +9,14 @@ import 'package:money_management/features/presentation/bloc/sheet/sheet_cubit.da
 import 'package:money_management/features/presentation/shared/ui/Button/button.dart';
 import 'package:money_management/features/presentation/shared/ui/Text/text.dart';
 
+// var spreadsheet = sheets.Spreadsheet();
+// spreadsheet.properties =
+//     sheets.SpreadsheetProperties(title: 'My Spreadsheet5821');
+// spreadsheet.sheets = [
+//   sheets.Sheet(properties: sheets.SheetProperties(title: 'Sheet12'))
+// ];
 
-
-  // var spreadsheet = sheets.Spreadsheet();
-      // spreadsheet.properties =
-      //     sheets.SpreadsheetProperties(title: 'My Spreadsheet5821');
-      // spreadsheet.sheets = [
-      //   sheets.Sheet(properties: sheets.SheetProperties(title: 'Sheet12'))
-      // ];
-
-      // await client.spreadsheets.create(spreadsheet);
-
-
+// await client.spreadsheets.create(spreadsheet);
 
 List<String> list = <String>['One', 'Two', 'Three', 'Four'];
 
@@ -40,8 +36,34 @@ class TransactionStateAdd extends State<TransactionAdd> {
     final sheetState = context.read<SheetCubit>().state;
 
     if (sheetState is SheetSuccess) {
-      
-      await context.read<SheetCubit>().pushDataSpreadSheet();
+
+      // print();
+
+      await context.read<SheetCubit>().pushDataSpreadSheet(rows: [
+        RowData(values: [
+          CellData(userEnteredValue: ExtendedValue(stringValue: 'VAlue2111')),
+          CellData(
+              userEnteredValue: ExtendedValue(
+            stringValue: "New Value 111",
+          )),
+          CellData(
+              userEnteredValue: ExtendedValue(
+            stringValue: "New Value 222",
+          )),
+          CellData(
+              userEnteredValue: ExtendedValue(stringValue: "New Value 333")),
+          CellData(
+              userEnteredValue: ExtendedValue(
+            stringValue: "New Value 111",
+          )),
+          CellData(
+              userEnteredValue: ExtendedValue(
+            stringValue: "New Value 222",
+          )),
+          CellData(
+              userEnteredValue: ExtendedValue(stringValue: "New Value 333")),
+        ])
+      ]);
 
       BatchUpdateSpreadsheetRequest request =
           BatchUpdateSpreadsheetRequest(requests: [
