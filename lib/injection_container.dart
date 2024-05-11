@@ -6,8 +6,15 @@ import 'package:money_management/features/data/repository/sheet_repository_impl.
 import 'package:money_management/features/data/repository/user_repository_impl.dart';
 import 'package:money_management/features/domain/repository/sheets_repository.dart';
 import 'package:money_management/features/domain/repository/user_repository.dart';
+import 'package:money_management/features/domain/usecase/sheets/clear_empty_sheet_row_value_usecase.dart';
+import 'package:money_management/features/domain/usecase/sheets/create_spreadsheet_usecase.dart';
+import 'package:money_management/features/domain/usecase/sheets/delete_sheet_row_usecase.dart';
 import 'package:money_management/features/domain/usecase/sheets/drive_init_usecase.dart';
-import 'package:money_management/features/domain/usecase/sheets/sheets_create_usecase.dart';
+import 'package:money_management/features/domain/usecase/sheets/get_categories_usecase.dart';
+import 'package:money_management/features/domain/usecase/sheets/get_posts_usecase.dart';
+import 'package:money_management/features/domain/usecase/sheets/get_sheets_usecase.dart';
+import 'package:money_management/features/domain/usecase/sheets/get_spreadsheet_usecase.dart';
+import 'package:money_management/features/domain/usecase/sheets/set_data_sheet_usecase.dart';
 import 'package:money_management/features/domain/usecase/sheets/sheets_init_usecase.dart';
 import 'package:money_management/features/domain/usecase/user_authenticated_client_usecase.dart';
 import 'package:money_management/features/domain/usecase/user_is_auth_usecase.dart';
@@ -16,16 +23,13 @@ import 'package:money_management/features/domain/usecase/user_sign_out_usecase.d
 import 'package:money_management/features/presentation/bloc/sheet/sheet_cubit.dart';
 import 'package:money_management/features/presentation/bloc/user/user_cubit.dart';
 
-
 final sl = GetIt.instance;
 
 Future<void> init() async {
-
   // GOOGLE_SIGN_IN_OPTIONS
   sl.registerSingleton<GoogleSignIn>(GoogleSignIn(
     clientId:
         '484095062673-bubg4k1m93h9n0va5q3299rd0ol33kto.apps.googleusercontent.com',
-    
     scopes: [
       drive.DriveApi.driveScriptsScope,
       drive.DriveApi.driveScope,
@@ -42,8 +46,17 @@ Future<void> init() async {
 
   //? SHEET
   sl.registerLazySingleton(() => SheetsInit(sheetsRepo: sl()));
-  sl.registerLazySingleton(() => SheetsCreate(sheetsRepo: sl()));
   sl.registerLazySingleton(() => DriveInitUseCase(sheetsRepo: sl()));
+
+  sl.registerLazySingleton(() => GetSpreadSheetUseCase(sheetsRepo: sl()));
+  sl.registerLazySingleton(() => CreateSpreadSheetUseCase(sheetsRepo: sl()));
+  sl.registerLazySingleton(() => GetSheetsUseCase(sheetsRepo: sl()));
+  sl.registerLazySingleton(() => GetCategoriesUseCase(sheetsRepo: sl()));
+  sl.registerLazySingleton(() => GetPostsUseCase(sheetsRepo: sl()));
+  sl.registerLazySingleton(
+      () => ClearEmptySheetRowsValueUseCase(sheetsRepo: sl()));
+  sl.registerLazySingleton(() => DeleteSheetRowUseCase(sheetsRepo: sl()));
+  sl.registerLazySingleton(() => SetDataSheetUseCase(sheetsRepo: sl()));
 
   // USE CASE END
 
@@ -54,10 +67,22 @@ Future<void> init() async {
   sl.registerLazySingleton<SheetsRepository>(() => SheetRepositoryImpl());
 
   // BLOC
-  sl.registerFactory<UserCubit>(() => UserCubit(sl() , sl()));
+  sl.registerFactory<UserCubit>(() => UserCubit(sl(), sl()));
 
-  sl.registerFactory<SheetCubit>(() => SheetCubit(sl(), sl()));
+  // sl.registerFactoryAsync(() => SheetCubit(
+  //       sheetInitUseCase: sl(),
+  //       driveInitUseCase: sl(),
+  //       getSpreadSheetUseCase: sl(),
+  //       getDataSpreadSheetUseCase: sl(),
+  //       clearEmptySheetRowsValueUseCase: sl(),
+  //       deleteSheetRowUseCase: sl(),
+  //       getCategoriesUseCase: sl(),
+  //       getPostsUseCase: sl(),
+  //       createSpreadSheetUseCase: sl(),
+  //       getSheetsUseCase: sl(),
+  //       setDataSheetUseCase: sl(),
+  //     ));
 
-  
-
+  sl.registerFactory<SheetCubit>(() =>
+      SheetCubit(sl(), sl(), sl(), sl(), sl(), sl(), sl(), sl(), sl(), sl()));
 }

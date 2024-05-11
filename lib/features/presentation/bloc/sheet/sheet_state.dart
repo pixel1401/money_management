@@ -1,44 +1,60 @@
 part of 'sheet_cubit.dart';
 
-abstract class SheetState {}
-
-class SheetValueRange extends ValueRange {
-  String? sheetName;
-  SheetValueRange({
-    String? majorDimension,
-    String? range,
-    List<List<Object?>>? values,
-    required String sheetName
-  }) : super(majorDimension: majorDimension , range: range , values: values) {
-    this.sheetName = sheetName;
-  }
-}
 
 
-class SheetLoading extends SheetState {}
-class SheetInitial extends SheetState {}
-class SheetSuccess extends SheetState {
+class SheetState{
   SheetsApi? sheetsApi;
   DriveApi? driveApi;
-  Spreadsheet? currentFile;
+  Spreadsheet? spreadsheet;
   String? spreadsheetId;
   List<SheetValueRange>? sheetsValueRange;
+  List<String>? categories;
+  List<Post>? posts;
 
-  SheetSuccess([this.sheetsApi , this.driveApi , this.currentFile , this.spreadsheetId , this.sheetsValueRange]);
+  bool isLoading = false;
+  bool isError = false;
 
-  SheetSuccess copyWith({
-    SheetsApi? sheetsApi,
-    DriveApi? driveApi,
-    Spreadsheet? currentFile,
-    String? spreadsheetId,
-    List<SheetValueRange>? sheetsValueRange
-  }) {
-    return SheetSuccess(
-      sheetsApi ?? this.sheetsApi,
-      driveApi ?? this.driveApi,
-      currentFile ?? this.currentFile,
-      spreadsheetId ?? this.spreadsheetId,
-      sheetsValueRange ?? this.sheetsValueRange
-    );
+  SheetState(
+      {this.isLoading = false,
+      this.isError = false,
+      this.sheetsApi,
+      this.driveApi,
+      this.spreadsheet,
+      this.spreadsheetId,
+      this.sheetsValueRange,
+      this.categories,
+      this.posts});
+
+  SheetState copyWith(
+      {bool? isLoading,
+      bool? isError,
+      SheetsApi? sheetsApi,
+      DriveApi? driveApi,
+      Spreadsheet? spreadsheet,
+      String? spreadsheetId,
+      List<SheetValueRange>? sheetsValueRange,
+      List<String>? categories,
+      List<Post>? posts,
+      }) {
+    return SheetState(
+        isLoading: isLoading ?? this.isLoading,
+        isError: isError ?? this.isError,
+        sheetsApi: sheetsApi ?? this.sheetsApi,
+        driveApi: driveApi ?? this.driveApi,
+        spreadsheet: spreadsheet ?? this.spreadsheet,
+        spreadsheetId: spreadsheetId ?? this.spreadsheetId,
+        sheetsValueRange: sheetsValueRange ?? this.sheetsValueRange,
+        categories: categories ?? this.categories,
+        posts: posts ?? this.posts);
+  }
+
+
+  SheetState startResponse (bool value) {
+    if(value) {
+      return copyWith(isError: false, isLoading: true);
+    }else {
+      return copyWith(isError: false , isLoading: false);
+    }
   }
 }
+

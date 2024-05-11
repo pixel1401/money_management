@@ -18,7 +18,6 @@ import 'package:money_management/features/presentation/shared/ui/Text/text.dart'
 
 // await client.spreadsheets.create(spreadsheet);
 
-List<String> list = <String>['One', 'Two', 'Three', 'Four'];
 
 class TransactionAdd extends StatefulWidget {
   const TransactionAdd({super.key});
@@ -30,83 +29,39 @@ class TransactionAdd extends StatefulWidget {
 class TransactionStateAdd extends State<TransactionAdd> {
   final _formKey = GlobalKey<FormBuilderState>();
 
-  String dropdownValue = list.first;
+  String dropdownValue = '';
+  bool isCreateCategory = false;
 
-  handleSubmit(BuildContext context) async {
+  handleSubmit(BuildContext context, Map<String, dynamic> data) async {
     final sheetState = context.read<SheetCubit>().state;
 
-    if (sheetState is SheetSuccess) {
+    List<CellData>? valuesReq = [];
 
-      // print();
+    Map<String, dynamic> newData = {
+      'category': !isCreateCategory ? data['category'] : data['createCategory'],
+      'title': data['name'],
+      'time': data['time'],
+      'amount': data['amount']
+    };
 
-      await context.read<SheetCubit>().pushDataSpreadSheet(rows: [
-        RowData(values: [
-          CellData(userEnteredValue: ExtendedValue(stringValue: 'VAlue2111')),
-          CellData(
-              userEnteredValue: ExtendedValue(
-            stringValue: "New Value 111",
-          )),
-          CellData(
-              userEnteredValue: ExtendedValue(
-            stringValue: "New Value 222",
-          )),
-          CellData(
-              userEnteredValue: ExtendedValue(stringValue: "New Value 333")),
-          CellData(
-              userEnteredValue: ExtendedValue(
-            stringValue: "New Value 111",
-          )),
-          CellData(
-              userEnteredValue: ExtendedValue(
-            stringValue: "New Value 222",
-          )),
-          CellData(
-              userEnteredValue: ExtendedValue(stringValue: "New Value 333")),
-        ])
-      ]);
-
-      BatchUpdateSpreadsheetRequest request =
-          BatchUpdateSpreadsheetRequest(requests: [
-        Request(
-            updateCells: UpdateCellsRequest(
-          fields: "*",
-          start: GridCoordinate(
-              columnIndex: 2,
-              rowIndex: 5,
-              sheetId: sheetState.currentFile!.sheets?[0].properties?.sheetId),
-          rows: [
-            RowData(
-              values: [
-                CellData(
-                    userEnteredValue: ExtendedValue(
-                  stringValue: "New Value 111",
-                )),
-                CellData(
-                    userEnteredValue: ExtendedValue(
-                  stringValue: "New Value 222",
-                )),
-                CellData(
-                    userEnteredValue:
-                        ExtendedValue(stringValue: "New Value 333")),
-              ],
-            ),
-            RowData(values: [
-              CellData(
-                  userEnteredValue: ExtendedValue(stringValue: 'VAlue2111')),
-              CellData(
-                  userEnteredValue: ExtendedValue(stringValue: 'VAlue28788')),
-            ])
-          ],
-        ))
-      ]);
-
-      // var res = await sheetState.sheetsApi!.spreadsheets
-      //     .batchUpdate(request, sheetState.spreadsheetId!, $fields: "*");
-
-      print(sheetState.currentFile);
-      print(sheetState.spreadsheetId);
-      // print(res);
+    for (var a in newData.values) {
+      valuesReq.add(
+          CellData(userEnteredValue: ExtendedValue(stringValue: a.toString())));
     }
+
+    // CATEGORY
+    // NAME
+    // DATE
+    // Amount
+
+    await context
+        .read<SheetCubit>()
+        .pushDataSpreadSheet(rows: [RowData(values: valuesReq)]);
+  }
+
+  @override
+  void initState() {
+    super.initState();
   }
 
   @override
@@ -114,106 +69,144 @@ class TransactionStateAdd extends State<TransactionAdd> {
     return Column(
       children: [
         BlocBuilder<SheetCubit, SheetState>(builder: (context, state) {
-          if (state is SheetSuccess) {
-            return Text('SUCCES');
+          if (state.isError == false && state.isLoading == false ) {
+            return Column(
+              children: [
+                FormBuilder(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      TextMy(
+                        'Title',
+                        variant: TextMyVariant.h1,
+                      ),
+                      Space(5),
+                      FormBuilderSwitch(
+                        name: 'isCreateCategory',
+                        title: Text('Создать категорию'),
+                        initialValue: isCreateCategory,
+                        onChanged: (e) {
+                          setState(() {
+                            isCreateCategory = e ?? false;
+                          });
+                        },
+                      ),
+                      Space(5),
+                      FormBuilderDropdown<String>(
+                        name: 'category',
+                        enabled: !isCreateCategory,
+                        // initialValue: state.categories?.first ?? '',
+                        decoration: InputDecoration(
+                            border: InputBorder.none,
+                            hintText: "Category",
+                            fillColor: Colors.black12,
+                            filled: true),
+                        onChanged: (String? value) {
+                          setState(() {
+                            dropdownValue = value!;
+                          });
+                        },
+                        items: (state.categories ?? [])
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                              value: value, child: Text(value));
+                        }).toList(),
+                      ),
+                      Space(5),
+                      FormBuilderTextField(
+                        name: 'createCategory',
+                        enabled: isCreateCategory,
+                        decoration: InputDecoration(
+                            border: InputBorder.none,
+                            hintText: "Category name",
+                            fillColor: Colors.black12,
+                            filled: true),
+                        onChanged: (value) {
+                          // Обработка изменения ввода текста
+                        },
+                      ),
+                      Space(5),
+                      FormBuilderTextField(
+                        name: 'name',
+                        decoration: InputDecoration(
+                            border: InputBorder.none,
+                            hintText: "Name",
+                            fillColor: Colors.black12,
+                            filled: true),
+                        onChanged: (value) {
+                          // Обработка изменения ввода текста
+                        },
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter some text';
+                          }
+                          return null;
+                        },
+                      ),
+                      Space(5),
+                      FormBuilderField(
+                        name: 'time',
+                        builder: (FormFieldState<dynamic> field) {
+                          return Button(
+                              onPress: () async {
+                                DateTime? pickedDate = await showDatePicker(
+                                  context: context,
+                                  initialDate:
+                                      DateTime.now(), //get today's date
+                                  firstDate: DateTime(
+                                      2000), //DateTime.now() - not to allow to choose before today.
+                                  lastDate: DateTime(2101),
+                                );
+
+                                field.didChange(pickedDate);
+                              },
+                              text: 'Time');
+                        },
+                      ),
+                      Space(5),
+                      FormBuilderTextField(
+                        name: 'amount',
+                        keyboardType: TextInputType.number,
+                        inputFormatters: <TextInputFormatter>[
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        decoration: InputDecoration(
+                            border: InputBorder.none,
+                            hintText: "Amount",
+                            fillColor: Colors.black12,
+                            filled: true),
+                        onChanged: (value) {
+                          // Обработка изменения ввода текста
+                        },
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter some text';
+                          }
+                          return null;
+                        },
+                      ),
+                      Space(5),
+                      Button(
+                          onPress: () {
+                            // _formKey.currentState?.saveAndValidate();
+                            // debugPrint(_formKey.currentState?.value.toString());
+
+                            // _formKey.currentState?.validate();
+                            if (_formKey.currentState?.validate() ?? false) {
+                              handleSubmit(context,
+                                  _formKey.currentState?.instantValue ?? {});
+                            }
+                            // Navigator.pop(context);
+                          },
+                          text: 'Submit'),
+                    ],
+                  ),
+                ),
+              ],
+            );
           }
-          return Text('ERROR');
+          return const Center(child: CircularProgressIndicator());
         }),
-        FormBuilder(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextMy(
-                'Title',
-                variant: TextMyVariant.h1,
-              ),
-              Space(5),
-              FormBuilderDropdown<String>(
-                name: 'category',
-                initialValue: list.first,
-                onChanged: (String? value) {
-                  setState(() {
-                    dropdownValue = value!;
-                  });
-                },
-                items: list.map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                      value: value, child: Text(value));
-                }).toList(),
-              ),
-              FormBuilderTextField(
-                name: 'name',
-                decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: "Введите логин",
-                    fillColor: Colors.black12,
-                    filled: true),
-                onChanged: (value) {
-                  // Обработка изменения ввода текста
-                },
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter some text';
-                  }
-                  return null;
-                },
-              ),
-              FormBuilderField(
-                name: 'time',
-                builder: (FormFieldState<dynamic> field) {
-                  return Button(
-                      onPress: () async {
-                        DateTime? pickedDate = await showDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(), //get today's date
-                            firstDate: DateTime(
-                                2000), //DateTime.now() - not to allow to choose before today.
-                            lastDate: DateTime(2101));
-
-                        field.didChange(pickedDate);
-                      },
-                      text: 'Time');
-                },
-              ),
-              FormBuilderTextField(
-                name: 'amount',
-                keyboardType: TextInputType.number,
-                inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly,
-                ],
-                decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: "Amount",
-                    fillColor: Colors.black12,
-                    filled: true),
-                onChanged: (value) {
-                  // Обработка изменения ввода текста
-                },
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter some text';
-                  }
-                  return null;
-                },
-              ),
-              Space(5),
-              Button(
-                  onPress: () {
-                    // _formKey.currentState?.saveAndValidate();
-                    // debugPrint(_formKey.currentState?.value.toString());
-
-                    // _formKey.currentState?.validate();
-                    if (_formKey.currentState?.validate() ?? false) {
-                      debugPrint(
-                          _formKey.currentState?.instantValue.toString());
-                      handleSubmit(context);
-                    }
-                    // Navigator.pop(context);
-                  },
-                  text: 'Submit'),
-            ],
-          ),
-        ),
       ],
     );
   }

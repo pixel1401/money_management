@@ -1,202 +1,143 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:googleapis/cloudsearch/v1.dart';
 import 'package:googleapis/sheets/v4.dart';
 import 'package:googleapis/drive/v3.dart';
 import 'package:googleapis_auth/googleapis_auth.dart';
+import 'package:money_management/features/domain/entity/post.dart';
+import 'package:money_management/features/domain/usecase/sheets/clear_empty_sheet_row_value_usecase.dart';
+import 'package:money_management/features/domain/usecase/sheets/create_spreadsheet_usecase.dart';
+import 'package:money_management/features/domain/usecase/sheets/delete_sheet_row_usecase.dart';
 import 'package:money_management/features/domain/usecase/sheets/drive_init_usecase.dart';
+import 'package:money_management/features/domain/usecase/sheets/get_categories_usecase.dart';
+import 'package:money_management/features/domain/usecase/sheets/get_posts_usecase.dart';
+import 'package:money_management/features/domain/usecase/sheets/get_sheets_usecase.dart';
+import 'package:money_management/features/domain/usecase/sheets/get_spreadsheet_usecase.dart';
+import 'package:money_management/features/domain/usecase/sheets/set_data_sheet_usecase.dart';
 import 'package:money_management/features/domain/usecase/sheets/sheets_init_usecase.dart';
 
 part 'sheet_state.dart';
-
-const APP_FILE_NAME = 'Money_Management';
-const QUERY_FILE = 'name="Money_Management" and trashed = false';
 
 class SheetCubit extends Cubit<SheetState> {
   // AuthClient credentials;
   SheetsInit sheetInitUseCase;
   DriveInitUseCase driveInitUseCase;
+  GetSpreadSheetUseCase getSpreadSheetUseCase;
+  CreateSpreadSheetUseCase createSpreadSheetUseCase;
+  GetSheetsUseCase getSheetsUseCase;
+  GetCategoriesUseCase getCategoriesUseCase;
+  GetPostsUseCase getPostsUseCase;
+  ClearEmptySheetRowsValueUseCase clearEmptySheetRowsValueUseCase;
+  DeleteSheetRowUseCase deleteSheetRowUseCase;
+  SetDataSheetUseCase setDataSheetUseCase;
 
-  SheetCubit(this.sheetInitUseCase, this.driveInitUseCase)
-      : super(SheetLoading());
+  SheetCubit(
+      this.sheetInitUseCase,
+      this.driveInitUseCase,
+      this.getSpreadSheetUseCase,
+      this.createSpreadSheetUseCase,
+      this.getSheetsUseCase,
+      this.getCategoriesUseCase,
+      this.getPostsUseCase,
+      this.clearEmptySheetRowsValueUseCase,
+      this.deleteSheetRowUseCase,
+      this.setDataSheetUseCase)
+      : super(SheetState(isLoading: true, isError: false));
 
   void initSheet(AuthClient credentials) async {
     try {
+      // emit(state.startResponse(true));
       var sheetData = await sheetInitUseCase.call(credentials);
-      emit(SheetSuccess(sheetData));
+      emit(state.copyWith(sheetsApi: sheetData));
 
       var driveData = await driveInitUseCase.call(credentials);
-      var currentState = state;
-      if (currentState is SheetSuccess) {
-        var newState = currentState.copyWith(driveApi: driveData);
-        emit(newState);
-      }
+      emit(state.copyWith(driveApi: driveData));
 
-      if (state is SheetSuccess) {
-        await getSpreadSheet();
-        await getDataSpreadSheet();
-      }
+      await getSpreadSheet();
+      await getSheets();
+      await getCategories();
+      await getPosts();
+
+      emit(state.startResponse(false));
     } catch (e) {
       throw ('ERROR INIT APIES', e);
     }
   }
 
-  Future<void> getSpreadSheet() async {
-    var spreadsheet = Spreadsheet();
-    spreadsheet.properties = SpreadsheetProperties(title: APP_FILE_NAME);
-    spreadsheet.sheets = [
-      Sheet(properties: SheetProperties(title: DateTime.now().year.toString()))
-    ];
-
-    var currentState = state;
-
-    if (currentState is SheetSuccess &&
-        currentState.driveApi != null &&
-        currentState.sheetsApi != null) {
-      var datafileList = await currentState.driveApi!.files.list(q: QUERY_FILE);
-
-      Spreadsheet? dataSpread;
-
-      if (datafileList.files != null && datafileList.files!.length > 0) {
-        var getSpreadSheet = await currentState.sheetsApi!.spreadsheets
-            .get(datafileList.files?.first.id ?? '');
-
-        dataSpread = getSpreadSheet;
-      } else {
-        var createSpreadSheet =
-            await currentState.sheetsApi!.spreadsheets.create(spreadsheet);
-        dataSpread = createSpreadSheet;
-      }
-
-      if (dataSpread != null) {
-        emit(currentState.copyWith(
-            currentFile: dataSpread, spreadsheetId: dataSpread.spreadsheetId));
-      }
-    }
+  Future<void> getCategories() async {
+    var categories = await getCategoriesUseCase.call(GetCategoriesParams(
+        sheetsApi: state.sheetsApi!,
+        dataSpread: state.spreadsheet!,
+        sheetValueRange: state.sheetsValueRange!));
+    emit(state.copyWith(categories: categories));
   }
 
-  Future<void> getDataSpreadSheet() async {
-    var currentState = state;
-    List<SheetValueRange> dataValueRange = [];
-    if (currentState is SheetSuccess) {
-      List<String> sheetNames = [];
-      if (currentState.currentFile?.sheets != null) {
-        for (var a in currentState.currentFile!.sheets!) {
-          if (a.properties?.title != null) {
-            sheetNames.add(a.properties!.title!);
-          }
-        }
-      }
+  Future<void> getSheets() async {
+    var sheets = await getSheetsUseCase
+        .call(GetSheetsParams(state.sheetsApi!, state.spreadsheet!));
+    emit(state.copyWith(sheetsValueRange: sheets));
+  }
 
-      for (var a in sheetNames) {
-        var data = await currentState.sheetsApi!.spreadsheets.values
-            .get(currentState.spreadsheetId ?? '', a + '!A:D');
-        dataValueRange.add(SheetValueRange(
-            sheetName: a,
-            majorDimension: data.majorDimension,
-            values: data.values));
-      }
+  Future<void> getPosts() async {
+    var posts = await getPostsUseCase.call(GetPostsParams(
+      sheetsApi: state.sheetsApi!,
+      dataSpread: state.spreadsheet!,
+      sheetValueRange: state.sheetsValueRange!,
+    ));
+    emit(state.copyWith(posts: posts));
+  }
 
-      if (dataValueRange.length > 0) {
-        emit(currentState.copyWith(sheetsValueRange: dataValueRange));
-      }
+  //? Получение spreadsheet / если нет создание
+  Future<void> getSpreadSheet() async {
+    if (state.sheetsApi == null || state.driveApi == null) return;
+
+    var spreadsheet = await getSpreadSheetUseCase
+        .call(GetSpreadSheetParams(state.driveApi!, state.sheetsApi!));
+
+    if (spreadsheet == null) {
+      var createSpreadSheet = await createSpreadSheetUseCase
+          .call(CreateSpreadSheetParams(state.sheetsApi!));
+      emit(state.copyWith(spreadsheet: createSpreadSheet));
+    } else {
+      emit(state.copyWith(spreadsheet: spreadsheet));
     }
   }
 
   Future<void> clearEmptySheetRowsValue() async {
-    var currentState = state;
-    if (currentState is! SheetSuccess) return;
-
-    var currentStateSuccess = currentState as SheetSuccess;
-    if (currentStateSuccess.sheetsValueRange == null) return;
-
-    List<Request>? requestsForDelete = [];
-
-    for (var a in currentStateSuccess.sheetsValueRange!) {
-      int rowIndexLast = a.values?.length ?? 0;
-      int indexList = currentStateSuccess.sheetsValueRange!.indexOf(a);
-      if (a.values == null) continue;
-
-      for (var i = 0; i < a.values!.length; i++) {
-        var valueItem = a.values![i];
-
-        if (valueItem == null) continue;
-        if (valueItem.length < 4) {
-          var itemProperties =
-              currentState.currentFile?.sheets?[indexList].properties;
-          if (itemProperties?.title != a.sheetName) break;
-          requestsForDelete.add(Request(
-              deleteDimension: DeleteDimensionRequest(
-                  range: DimensionRange(
-                      sheetId: itemProperties?.sheetId,
-                      dimension: "ROWS",
-                      startIndex: i,
-                      endIndex: i + 1))));
-        }
-      }
-    }
-
-    if (requestsForDelete.length > 0) {
-      BatchUpdateSpreadsheetRequest request =
-          BatchUpdateSpreadsheetRequest(requests: requestsForDelete);
-      await currentStateSuccess.sheetsApi!.spreadsheets.batchUpdate(
-        request,
-        currentStateSuccess.spreadsheetId ?? '',
-      );
-    }
+    await clearEmptySheetRowsValueUseCase.call(ClearEmptySheetRowsValueParams(
+      sheetsApi: state.sheetsApi!,
+      dataSpread: state.spreadsheet!,
+      sheetsValueRange: state.sheetsValueRange!,
+    ));
+    await getSheets();
   }
 
-  Future<void> deleteSheetRow({required int sheetId, required int index}) async {
-    var currentState = state;
-    if (currentState is! SheetSuccess) return;
-
-    Request requestsForDelete = Request(
-        deleteDimension: DeleteDimensionRequest(
-            range: DimensionRange(
-                sheetId: sheetId,
-                dimension: "ROWS",
-                startIndex: index,
-                endIndex: index + 1)));
-
-    BatchUpdateSpreadsheetRequest request =
-        BatchUpdateSpreadsheetRequest(requests: [requestsForDelete]);
-    await currentState.sheetsApi!.spreadsheets.batchUpdate(
-      request,
-      currentState.spreadsheetId ?? '',
-    );
+  Future<void> deleteSheetRow(
+      {required int sheetId, required int index}) async {
+    emit(state.startResponse(true));
+    await deleteSheetRowUseCase.call(DeleteSheetRowParams(
+      sheetId: sheetId,
+      index: index,
+      sheetsApi: state.sheetsApi!,
+      dataSpread: state.spreadsheet!,
+    ));
+    await getSheets();
+    await getCategories();
+    await getPosts();
+    emit(state.startResponse(false));
   }
 
   Future<void> pushDataSpreadSheet({required List<RowData> rows}) async {
-    if (state is! SheetSuccess) return;
+    emit(state.startResponse(true));
+    var data = await setDataSheetUseCase.call(SetDataSheetParams(
+      rows: rows,
+      sheetsApi: state.sheetsApi!,
+      dataSpread: state.spreadsheet!,
+      sheetsValueRange: state.sheetsValueRange!,
+    ));
 
-    var currentState = state as SheetSuccess;
-    if (currentState.sheetsValueRange == null) return;
-
-    for (var a in currentState.sheetsValueRange!) {
-      if (a.sheetName == DateTime.now().year.toString()) {
-        int rowIndexLast = a.values?.length ?? 0;
-
-        BatchUpdateSpreadsheetRequest request =
-            BatchUpdateSpreadsheetRequest(requests: [
-          Request(
-              updateCells: UpdateCellsRequest(
-            fields: "*",
-            start: GridCoordinate(
-                columnIndex: 0,
-                rowIndex: rowIndexLast,
-                sheetId:
-                    currentState.currentFile!.sheets?[0].properties?.sheetId),
-            rows: rows,
-          ))
-        ]);
-
-        var res = await currentState.sheetsApi!.spreadsheets
-            .batchUpdate(request, currentState.spreadsheetId!, $fields: "*");
-        emit(currentState.copyWith(
-            currentFile: res.updatedSpreadsheet,
-            spreadsheetId: res.spreadsheetId));
-        await getDataSpreadSheet();
-        await clearEmptySheetRowsValue();
-      }
-    }
+    await getSheets();
+    await clearEmptySheetRowsValue();
+    await getCategories();
+    await getPosts();
+    emit(state.startResponse(false));
   }
 }

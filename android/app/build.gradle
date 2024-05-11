@@ -55,7 +55,7 @@ android {
         debug {
             keyAlias 'androiddebugkey'
             keyPassword '123123'
-            storeFile file('mykey.jks')
+            storeFile file('new.jks')
             storePassword '123123'
         }
     }

@@ -64,4 +64,4 @@ class MyApp extends StatelessWidget {
 //         -alias androiddebugkey
 
 
-//  .\keytool.exe  -genkey -v -keystore C:\Users\User\mykey.jks -storetype JKS -keyalg RSA -keysize 2048 -validity 10000  -alias androiddebugkey
+//  .\keytool.exe  -genkey -v -keystore C:\Users\User\mykey.jks -storetype JKS -keyalg RSA -keysize 2048 -validity 10000  -alias androiddebugkeyё
