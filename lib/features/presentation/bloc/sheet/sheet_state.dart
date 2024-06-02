@@ -11,6 +11,12 @@ class SheetState{
   List<String>? categories;
   List<Post>? posts;
 
+  List<PieChartVM>? pieChartData;
+
+  num? totalPrice;
+  List<Post>? periodPost;  
+
+  // STATE_RESPONSE
   bool isLoading = false;
   bool isError = false;
 
@@ -23,7 +29,10 @@ class SheetState{
       this.spreadsheetId,
       this.sheetsValueRange,
       this.categories,
-      this.posts});
+      this.posts,
+      this.totalPrice,
+      this.pieChartData
+    });
 
   SheetState copyWith(
       {bool? isLoading,
@@ -35,6 +44,8 @@ class SheetState{
       List<SheetValueRange>? sheetsValueRange,
       List<String>? categories,
       List<Post>? posts,
+      num? totalPrice,
+      List<PieChartVM>? pieChartData
       }) {
     return SheetState(
         isLoading: isLoading ?? this.isLoading,
@@ -45,7 +56,10 @@ class SheetState{
         spreadsheetId: spreadsheetId ?? this.spreadsheetId,
         sheetsValueRange: sheetsValueRange ?? this.sheetsValueRange,
         categories: categories ?? this.categories,
-        posts: posts ?? this.posts);
+        posts: posts ?? this.posts,
+        totalPrice: totalPrice ?? this.totalPrice,
+        pieChartData: pieChartData ?? this.pieChartData
+        );
   }
 
 

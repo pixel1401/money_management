@@ -46,3 +46,13 @@ SizedBox Space([double? heightArg, double? widthArg]) {
     width: widthArg,
   );
 }
+
+
+num calculateSum(List<dynamic> stringNumbers) {
+  // Используем fold для эффективного суммирования
+  return stringNumbers.fold<double>(0, (previousValue, element) {
+    // Преобразуем строку в число и добавляем к текущей сумме
+    double number = double.tryParse(element) ?? 0.0;
+    return previousValue + number;
+  });
+}

@@ -25,21 +25,18 @@ final GoRouter router = GoRouter(
           // This screen is displayed on the ShellRoute's Navigator.
           GoRoute(
             path: '/',
-            builder: (context, state) {
-              return const HomePage();
-            },
+            pageBuilder: (context, state) => NoTransitionPage<void>(
+                key: state.pageKey, child: const HomePage()),
           ),
           GoRoute(
             path: '/trans',
-            builder: (BuildContext context, GoRouterState state) {
-              return const Transaction();
-            },
+            pageBuilder: (context, state) => NoTransitionPage<void>(
+                key: state.pageKey, child: const Transaction()),
           ),
           GoRoute(
             path: '/trans/add',
-            builder: (BuildContext context, GoRouterState state) {
-              return const TransactionAdd();
-            },
+            pageBuilder: (context, state) => NoTransitionPage<void>(
+                key: state.pageKey, child: const TransactionAdd()),
           ),
         ],
       ),

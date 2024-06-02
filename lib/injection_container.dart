@@ -11,6 +11,7 @@ import 'package:money_management/features/domain/usecase/sheets/create_spreadshe
 import 'package:money_management/features/domain/usecase/sheets/delete_sheet_row_usecase.dart';
 import 'package:money_management/features/domain/usecase/sheets/drive_init_usecase.dart';
 import 'package:money_management/features/domain/usecase/sheets/get_categories_usecase.dart';
+import 'package:money_management/features/domain/usecase/sheets/get_posts_sort_date_usecase.dart';
 import 'package:money_management/features/domain/usecase/sheets/get_posts_usecase.dart';
 import 'package:money_management/features/domain/usecase/sheets/get_sheets_usecase.dart';
 import 'package:money_management/features/domain/usecase/sheets/get_spreadsheet_usecase.dart';
@@ -22,6 +23,9 @@ import 'package:money_management/features/domain/usecase/user_sign_in_usecase.da
 import 'package:money_management/features/domain/usecase/user_sign_out_usecase.dart';
 import 'package:money_management/features/presentation/bloc/sheet/sheet_cubit.dart';
 import 'package:money_management/features/presentation/bloc/user/user_cubit.dart';
+
+import 'features/domain/usecase/sheets/get_pie_chart_usecase.dart';
+import 'features/domain/usecase/sheets/get_total_price_sheet_usecase.dart';
 
 final sl = GetIt.instance;
 
@@ -57,7 +61,11 @@ Future<void> init() async {
       () => ClearEmptySheetRowsValueUseCase(sheetsRepo: sl()));
   sl.registerLazySingleton(() => DeleteSheetRowUseCase(sheetsRepo: sl()));
   sl.registerLazySingleton(() => SetDataSheetUseCase(sheetsRepo: sl()));
+  sl.registerFactory(() => GetPostsSortDateUsecase(sheetsRepo: sl()));
+  sl.registerFactory(() => GetTotalPriceSheetUsecase(sheetsRepo: sl()));
 
+  sl.registerFactory(() => GetPieChartUseCase(sheetsRepo: sl()));
+  
   // USE CASE END
 
   // Repository
@@ -69,20 +77,22 @@ Future<void> init() async {
   // BLOC
   sl.registerFactory<UserCubit>(() => UserCubit(sl(), sl()));
 
-  // sl.registerFactoryAsync(() => SheetCubit(
-  //       sheetInitUseCase: sl(),
-  //       driveInitUseCase: sl(),
-  //       getSpreadSheetUseCase: sl(),
-  //       getDataSpreadSheetUseCase: sl(),
-  //       clearEmptySheetRowsValueUseCase: sl(),
-  //       deleteSheetRowUseCase: sl(),
-  //       getCategoriesUseCase: sl(),
-  //       getPostsUseCase: sl(),
-  //       createSpreadSheetUseCase: sl(),
-  //       getSheetsUseCase: sl(),
-  //       setDataSheetUseCase: sl(),
-  //     ));
+  sl.registerFactory(() => SheetCubit(
+        sheetInitUseCase: sl(),
+        driveInitUseCase: sl(),
+        getSpreadSheetUseCase: sl(),
+        clearEmptySheetRowsValueUseCase: sl(),
+        deleteSheetRowUseCase: sl(),
+        getCategoriesUseCase: sl(),
+        getPostsUseCase: sl(),
+        createSpreadSheetUseCase: sl(),
+        getSheetsUseCase: sl(),
+        setDataSheetUseCase: sl(),
+        getPostsSortDateUsecase: sl(),
+        getTotalPriceSheetUsecase: sl(),
+        getPieChartUseCase: sl(),
+      ));
 
-  sl.registerFactory<SheetCubit>(() =>
-      SheetCubit(sl(), sl(), sl(), sl(), sl(), sl(), sl(), sl(), sl(), sl()));
+  // sl.registerFactory<SheetCubit>(() =>
+  //     SheetCubit(sl(), sl(), sl(), sl(), sl(), sl(), sl(), sl(), sl(), sl()));
 }

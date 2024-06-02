@@ -2,15 +2,19 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:googleapis/sheets/v4.dart';
 import 'package:googleapis/drive/v3.dart';
 import 'package:googleapis_auth/googleapis_auth.dart';
+import 'package:money_management/core/helpers/types.dart';
 import 'package:money_management/features/domain/entity/post.dart';
 import 'package:money_management/features/domain/usecase/sheets/clear_empty_sheet_row_value_usecase.dart';
 import 'package:money_management/features/domain/usecase/sheets/create_spreadsheet_usecase.dart';
 import 'package:money_management/features/domain/usecase/sheets/delete_sheet_row_usecase.dart';
 import 'package:money_management/features/domain/usecase/sheets/drive_init_usecase.dart';
 import 'package:money_management/features/domain/usecase/sheets/get_categories_usecase.dart';
+import 'package:money_management/features/domain/usecase/sheets/get_pie_chart_usecase.dart';
+import 'package:money_management/features/domain/usecase/sheets/get_posts_sort_date_usecase.dart';
 import 'package:money_management/features/domain/usecase/sheets/get_posts_usecase.dart';
 import 'package:money_management/features/domain/usecase/sheets/get_sheets_usecase.dart';
 import 'package:money_management/features/domain/usecase/sheets/get_spreadsheet_usecase.dart';
+import 'package:money_management/features/domain/usecase/sheets/get_total_price_sheet_usecase.dart';
 import 'package:money_management/features/domain/usecase/sheets/set_data_sheet_usecase.dart';
 import 'package:money_management/features/domain/usecase/sheets/sheets_init_usecase.dart';
 
@@ -28,18 +32,26 @@ class SheetCubit extends Cubit<SheetState> {
   ClearEmptySheetRowsValueUseCase clearEmptySheetRowsValueUseCase;
   DeleteSheetRowUseCase deleteSheetRowUseCase;
   SetDataSheetUseCase setDataSheetUseCase;
+  GetPostsSortDateUsecase getPostsSortDateUsecase;
+
+  GetTotalPriceSheetUsecase getTotalPriceSheetUsecase;
+
+  GetPieChartUseCase getPieChartUseCase;
 
   SheetCubit(
-      this.sheetInitUseCase,
-      this.driveInitUseCase,
-      this.getSpreadSheetUseCase,
-      this.createSpreadSheetUseCase,
-      this.getSheetsUseCase,
-      this.getCategoriesUseCase,
-      this.getPostsUseCase,
-      this.clearEmptySheetRowsValueUseCase,
-      this.deleteSheetRowUseCase,
-      this.setDataSheetUseCase)
+      {required this.sheetInitUseCase,
+      required this.driveInitUseCase,
+      required this.getSpreadSheetUseCase,
+      required this.createSpreadSheetUseCase,
+      required this.getSheetsUseCase,
+      required this.getCategoriesUseCase,
+      required this.getPostsUseCase,
+      required this.clearEmptySheetRowsValueUseCase,
+      required this.deleteSheetRowUseCase,
+      required this.setDataSheetUseCase,
+      required this.getPostsSortDateUsecase,
+      required this.getTotalPriceSheetUsecase,
+      required this.getPieChartUseCase})
       : super(SheetState(isLoading: true, isError: false));
 
   void initSheet(AuthClient credentials) async {
@@ -55,6 +67,10 @@ class SheetCubit extends Cubit<SheetState> {
       await getSheets();
       await getCategories();
       await getPosts();
+
+      await getTotalPrice();
+
+      await getPieChartData();
 
       emit(state.startResponse(false));
     } catch (e) {
@@ -107,7 +123,6 @@ class SheetCubit extends Cubit<SheetState> {
       dataSpread: state.spreadsheet!,
       sheetsValueRange: state.sheetsValueRange!,
     ));
-    await getSheets();
   }
 
   Future<void> deleteSheetRow(
@@ -122,6 +137,8 @@ class SheetCubit extends Cubit<SheetState> {
     await getSheets();
     await getCategories();
     await getPosts();
+    await getPieChartData();
+    await getTotalPrice();
     emit(state.startResponse(false));
   }
 
@@ -138,6 +155,47 @@ class SheetCubit extends Cubit<SheetState> {
     await clearEmptySheetRowsValue();
     await getCategories();
     await getPosts();
+    await getPieChartData();
+    await getTotalPrice();
     emit(state.startResponse(false));
+  }
+
+  getPostVer2() async {
+    if (state.sheetsApi == null &&
+        state.spreadsheet == null &&
+        state.sheetsValueRange == null) return;
+    var data = await getPostsSortDateUsecase.call(GetPostsSortDateUsecaseParams(
+      sheetsApi: state.sheetsApi!,
+      dataSpread: state.spreadsheet!,
+      sheetValueRange: state.sheetsValueRange!,
+    ));
+    print(data);
+  }
+
+  Future<num> getTotalPrice(
+      {DateTime? dateStart, DateTime? dateEnd, TimeRange? timeRange}) async {
+    var data =
+        await getTotalPriceSheetUsecase.call(GetTotalPriceSheetUsecaseParams(
+      sheetsApi: state.sheetsApi!,
+      dataSpread: state.spreadsheet!,
+      sheetsValueRange: state.sheetsValueRange!,
+      dateStart: dateStart,
+      dateEnd: dateEnd,
+      timeRange: timeRange,
+      sheetName: '2024',
+    ));
+    emit(state.copyWith(totalPrice: data));
+    return data;
+  }
+
+  Future<List<PieChartVM>> getPieChartData() async {
+    if (state.sheetsApi == null && state.spreadsheet == null) return [];
+    var data = await getPieChartUseCase.call(GetPieChartUseCaseParams(
+      dataSpread: state.spreadsheet!,
+      sheetsApi: state.sheetsApi!,
+      sheetName: '2024',
+    ));
+    emit(state.copyWith(pieChartData: data));
+    return data;
   }
 }

@@ -19,3 +19,18 @@ class Post {
   int index , sheetId;
   Post({required this.index , required this.sheetId, required this.category , required this.name  , required this.date , required this.amount });
 }
+
+class PostsData {
+  List<Post> posts;
+  int total;
+  int current;
+  PostsData({required this.posts , required this.total , required this.current});
+}
+
+
+class PieChartVM {
+  num percent;
+  String title;
+
+  PieChartVM({required this.percent, required this.title});
+}
