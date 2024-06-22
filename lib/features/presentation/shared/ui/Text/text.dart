@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:money_management/config/theme/theme.dart';
@@ -34,7 +33,7 @@ class TextMy extends StatelessWidget {
     switch (variant) {
       // BOLD
       case TextMyVariant.h1:
-        res = textTheme.headlineMedium!;
+        res = textTheme.headlineMedium!.copyWith(color: textPrimary);
         break;
       case TextMyVariant.h2:
         res = const TextStyle(fontSize: 20, fontWeight: FontWeight.bold);

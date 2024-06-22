@@ -26,6 +26,9 @@ class _WrapperState extends State<Wrapper> {
       case 2:
         context.go('/welcome');
         break;
+      case 3:
+        context.push('/transaction/add');
+        break;
       case 4:
         context.go('/auth');
       default:
@@ -39,13 +42,13 @@ class _WrapperState extends State<Wrapper> {
         child: Container(
           constraints:
               BoxConstraints(maxHeight: MediaQuery.of(context).size.height),
-          padding: EdgeInsets.symmetric(horizontal: 10),
+          
           child: widget.child,
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          context.go('/trans/add');
+          context.push('/transaction/add');
         },
         child: const Icon(Icons.add),
       ),

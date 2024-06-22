@@ -9,6 +9,7 @@ import 'package:money_management/features/presentation/pages/Welcome/welcome.dar
 import 'package:money_management/features/presentation/pages/wrapper.dart';
 
 import 'features/presentation/bloc/user/user_state.dart';
+import 'features/presentation/pages/AddTrans/addTrans.dart';
 import 'features/presentation/pages/Transaction/transaction.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -41,6 +42,11 @@ final GoRouter router = GoRouter(
         ],
       ),
       GoRoute(
+        path: '/transaction/add',
+        pageBuilder: (context, state) => NoTransitionPage<void>(
+            key: state.pageKey, child: const CreateTransaction()),
+      ),
+      GoRoute(
         path: '/welcome',
         builder: (BuildContext context, GoRouterState state) {
           return const WelcomePage();
@@ -48,14 +54,12 @@ final GoRouter router = GoRouter(
       ),
       GoRoute(
         path: '/auth',
-        builder: (BuildContext context, GoRouterState state) {
-          return const AuthPage();
-        },
+        pageBuilder: (context, state) =>
+            NoTransitionPage<void>(key: state.pageKey, child: const AuthPage()),
       ),
     ],
     redirect: (context, state) {
       var userState = context.read<UserCubit>().state;
-      print(userState);
       if (userState is UnAuthorizedState) {
         return '/welcome';
       }

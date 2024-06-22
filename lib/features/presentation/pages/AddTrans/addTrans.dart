@@ -1,112 +1,271 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:googleapis/drive/v3.dart' as drive;
-import 'package:googleapis_auth/auth_io.dart' as auth;
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:googleapis/sheets/v4.dart';
+import 'package:money_management/config/theme/theme.dart';
+import 'package:money_management/core/helpers/helpers.dart';
+import 'package:money_management/features/presentation/bloc/sheet/sheet_cubit.dart';
+import 'package:money_management/features/presentation/shared/ui/Button/button.dart';
+import 'package:money_management/features/presentation/shared/ui/Input/Input.dart';
+import 'package:money_management/features/presentation/shared/ui/Text/text.dart';
 
-class AddTrans extends StatefulWidget {
-  const AddTrans({super.key});
+import 'types/transaction_form.dart';
+
+class CreateTransaction extends StatefulWidget {
+  const CreateTransaction({super.key});
 
   @override
-  State<AddTrans> createState() => _AddTransState();
+  State<CreateTransaction> createState() => _CreateTransactionState();
 }
 
-class _AddTransState extends State<AddTrans> {
-  final _formKey = GlobalKey<FormState>();
+class _CreateTransactionState extends State<CreateTransaction> {
+  final _formKey = GlobalKey<FormBuilderState>();
 
-  Future<void> _createGoogleDoc() async {
-    // Аутентификация пользователя
-    var client = await auth.clientViaUserConsent(
-      auth.ClientId('419675828315-uohlvf2dcieap19ks9k6k9ibq4tqudtr.apps.googleusercontent.com', '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'),
-      ['https://www.googleapis.com/auth/drive.file'],
-      (url) {
-        // Отобразите URL для подтверждения пользователем
-        print("Please go to $url");
-      },
-    );
+  bool isCreateCategory = false;
+  String dropdownValue = '';
 
+  Future<void> handleSubmit(BuildContext context, TransactionForm data) async {
+    final sheetState = context.read<SheetCubit>().state;
 
-     // Создание Google Docs документа
-    var driveApi = drive.DriveApi(client);
+    if (sheetState.sheetsApi == null && sheetState.spreadsheet == null) {
+      return;
+    }
 
-    var fileMetadata = drive.File()
-      ..name = 'example-fluter12'
-      ..mimeType = 'application/vnd.google-apps.document';
+    List<CellData>? valuesReq = [];
 
-    var result = await driveApi.files.create(fileMetadata);
-    print('Google Docs document created with ID: ${result.id}');
+    Map<String, dynamic> newData = {
+      'category': !isCreateCategory ? data.category : data.createCategory,
+      'title': data.name,
+      'time': data.time,
+      'amount': data.amount
+    };
 
-    // Закройте клиент после использования
-    client.close();
+    for (var a in newData.values) {
+      valuesReq.add(
+          CellData(userEnteredValue: ExtendedValue(stringValue: a.toString())));
+    }
+
+    await context
+        .read<SheetCubit>()
+        .pushDataSpreadSheet(rows: [RowData(values: valuesReq)]);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Transaction'),
-      ),
-      body: SafeArea(
-          child: Container(
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width,
-          maxHeight: MediaQuery.of(context).size.height,
+        backgroundColor: redColors,
+        foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
-        child: SingleChildScrollView(
+        title: Text('Expense', style: TextStyle(color: Colors.white)),
+        centerTitle: true,
+      ),
+      body: FormBuilder(
+        key: _formKey,
+        child: Container(
+          color: redColors,
           child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                'How much?',
-                style: TextStyle(
-                  color: Color(0xFF090000),
-                  fontSize: 18,
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w600,
-                  height: 0,
-                ),
-              ),
-              Form(
-                key: _formKey,
-                child: Row(
+              Container(
+                color: redColors,
+                height: MediaQuery.of(context).size.height * 0.3,
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Expanded(
-                      child: TextFormField(
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          hintText: "Введите логин",
-                          helperText: "Логин используется для входа в систему",
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter some text';
-                          }
-                          return null;
-                        },
-                        keyboardType: TextInputType.number,
-                        inputFormatters: <TextInputFormatter>[
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                      ),
+                    TextMy(
+                      'How much?',
+                      type: TextMyType.secondary,
+                      style: TextStyle(color: Colors.white38),
                     ),
-                    ElevatedButton(
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Processing Data')),
-                            );
-                            
-                            _createGoogleDoc();
-                          }
-                        },
-                        child: Text('Submit'))
+                    Row(
+                      children: [
+                        TextMy(
+                          '\$',
+                          variant: TextMyVariant.h1,
+                          style: TextStyle(color: Colors.white, fontSize: 55),
+                        ),
+                        Space(0, 15),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.7,
+                          child: FormBuilderTextField(
+                            name: 'amount',
+                            style: TextStyle(color: Colors.white, fontSize: 45),
+                            cursorColor: Colors.white,
+                            decoration:
+                                InputDecoration(border: InputBorder.none),
+                            keyboardType: TextInputType.number,
+                            inputFormatters: <TextInputFormatter>[
+                              FilteringTextInputFormatter.digitsOnly
+                            ],
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter some text';
+                              }
+                              return null;
+                            },
+                          ),
+                        )
+                      ],
+                    )
                   ],
                 ),
-              )
+              ),
+              Expanded(
+                child: Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.only(top: 30, left: 15, right: 15),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(40),
+                          topRight: Radius.circular(40))),
+                  child: SingleChildScrollView(
+                    reverse: true,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          children: [
+                            FormBuilderSwitch(
+                              name: 'isCreateCategory',
+                              title: Text('Создать категорию',
+                                  style: TextStyle(fontSize: 20)),
+                              initialValue: isCreateCategory,
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                              ),
+                              onChanged: (e) {
+                                setState(() {
+                                  isCreateCategory = e ?? false;
+                                });
+                              },
+                            ),
+                            if (!isCreateCategory)
+                              Column(
+                                children: [
+                                  Space(15),
+                                  Input(
+                                    dropdown: FormBuilderDropdown<String>(
+                                      name: 'category',
+                                      decoration: const InputDecoration(
+                                          hintText: 'Category'),
+                                      items: (context
+                                                  .watch<SheetCubit>()
+                                                  .state
+                                                  .categories ??
+                                              [])
+                                          .map<DropdownMenuItem<String>>(
+                                              (String value) {
+                                        return DropdownMenuItem<String>(
+                                            value: value, child: Text(value));
+                                      }).toList(),
+                                      enabled: !isCreateCategory,
+                                      onChanged: (String? value) {
+                                        setState(() {
+                                          dropdownValue = value!;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            if (isCreateCategory)
+                              Column(
+                                children: [
+                                  Space(15),
+                                  Input(
+                                    textInput: FormBuilderTextField(
+                                      name: 'createCategory',
+                                      enabled: isCreateCategory,
+                                      decoration: InputDecoration(
+                                        hintText: 'createCategory',
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            Space(15),
+                            Input(
+                              textInput: FormBuilderTextField(
+                                name: 'name',
+                                decoration: InputDecoration(hintText: 'Name'),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter some text';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                            Space(15),
+                            Input(
+                              date: FormBuilderDateTimePicker(
+                                name: 'time',
+                                decoration: InputDecoration(hintText: 'Date'),
+                                validator: (value) {
+                                  if (value == null) {
+                                    return 'Please enter some text';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            Space(15),
+                            SizedBox(
+                              width: double.infinity,
+                              child: Button(
+                                  styleBtn: ElevatedButton.styleFrom(
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 20),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(20.0),
+                                      )),
+                                  onPress: () async {
+                                    // _formKey.currentState?.saveAndValidate();
+                                    // debugPrint(_formKey.currentState?.value.toString());
+
+                                    // _formKey.currentState?.validate();
+                                    if (_formKey.currentState?.validate() ??
+                                        false) {
+                                      await handleSubmit(
+                                          context,
+                                          TransactionForm.fromJson(_formKey
+                                                  .currentState?.instantValue ??
+                                              {}));
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(SnackBar(
+                                              content: Text('Success')));
+                                    }
+                                    // Navigator.pop(context);
+                                  },
+                                  text: 'Save'),
+                            ),
+                            Space(15),
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
-      )),
+      ),
     );
   }
 }

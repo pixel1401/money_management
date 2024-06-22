@@ -35,16 +35,10 @@ class TransactionStateAdd extends State<TransactionAdd> {
       'amount': data['amount']
     };
 
-
     for (var a in newData.values) {
       valuesReq.add(
           CellData(userEnteredValue: ExtendedValue(stringValue: a.toString())));
     }
-
-    // CATEGORY
-    // NAME
-    // DATE
-    // Amount
 
     await context
         .read<SheetCubit>()
@@ -150,7 +144,10 @@ class TransactionStateAdd extends State<TransactionAdd> {
                           return Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              field.value != null ? Text(DateFormat("dd.MM.yyyy").format(field.value!)) : const SizedBox() ,
+                              field.value != null
+                                  ? Text(DateFormat("dd.MM.yyyy")
+                                      .format(field.value!))
+                                  : const SizedBox(),
                               Space(5),
                               Button(
                                   onPress: () async {
@@ -206,6 +203,9 @@ class TransactionStateAdd extends State<TransactionAdd> {
                             // Navigator.pop(context);
                           },
                           text: 'Submit'),
+
+                      Space(5),
+                      
                     ],
                   ),
                 ),

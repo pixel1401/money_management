@@ -8,6 +8,7 @@ final Color primary = HexColor('#fff');
 final Color black = HexColor('#303030');
 final Color successColor = HexColor('#58BC6B');
 final Color errorColor = Colors.red.shade400;
+final Color redColors = HexColor('#FD3C4A');
 
 
 final Color textPrimary = HexColor('#303030');
