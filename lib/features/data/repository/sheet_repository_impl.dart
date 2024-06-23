@@ -9,6 +9,8 @@ import 'package:money_management/features/domain/repository/sheets_repository.da
 const APP_FILE_NAME = 'Money_Management';
 const QUERY_FILE = 'name="Money_Management" and trashed = false';
 
+const endColumnLetter = 'E';
+
 class SheetRepositoryImpl implements SheetsRepository {
   // final SheetsApi client;
 
@@ -53,6 +55,7 @@ class SheetRepositoryImpl implements SheetsRepository {
             CellData(userEnteredValue: ExtendedValue(stringValue: "Name")),
             CellData(userEnteredValue: ExtendedValue(stringValue: "Date")),
             CellData(userEnteredValue: ExtendedValue(stringValue: "Amount")),
+            CellData(userEnteredValue: ExtendedValue(stringValue: "Color")),
           ])
         ])
       ], properties: SheetProperties(title: DateTime.now().year.toString())),
@@ -84,7 +87,7 @@ class SheetRepositoryImpl implements SheetsRepository {
 
     for (var a in sheetNames) {
       var data = await sheetsApi.spreadsheets.values
-          .get(dataSpread.spreadsheetId ?? '', a['sheetName'] + '!A:D');
+          .get(dataSpread.spreadsheetId ?? '', a['sheetName'] + '!A:$endColumnLetter');
       dataValueRange.add(SheetValueRange(
           sheetName: a['sheetName'],
           sheetId: a['sheetId'],
@@ -131,22 +134,25 @@ class SheetRepositoryImpl implements SheetsRepository {
 
     for (var a in sheetValueRange) {
       var data = await sheetsApi.spreadsheets.values
-          .get(dataSpread.spreadsheetId ?? '', '${a.sheetName}!A2:D');
+          .get(dataSpread.spreadsheetId ?? '', '${a.sheetName}!A2:$endColumnLetter');
       if (data.values != null) {
         for (var i = 0; i < (data.values ?? []).length; i++) {
-          var wrap = (data.values ?? [])[i] as dynamic;
+          List wrap = (data.values ?? [])[i] as dynamic;
           if (wrap[0] != null &&
               wrap[1] != null &&
               wrap[2] != null &&
               wrap[3] != null &&
               a.sheetId != null) {
+                
             Post post = Post(
                 index: i,
                 sheetId: a.sheetId!,
                 category: wrap[0],
                 name: wrap[1],
                 date: wrap[2],
-                amount: wrap[3]);
+                amount: wrap[3] ,
+                color: wrap.length != 5 ? null : wrap[4] ,  
+                 );
             posts.add(post);
           }
         }
@@ -337,7 +343,9 @@ class SheetRepositoryImpl implements SheetsRepository {
                       category: item?[0].userEnteredValue?.stringValue ?? '',
                       name: item?[1].userEnteredValue!.stringValue ?? '',
                       date: item?[2].userEnteredValue!.stringValue ?? '',
-                      amount: item?[3].userEnteredValue!.stringValue ?? '');
+                      amount: item?[3].userEnteredValue!.stringValue ?? '',
+                      color: item!.length > 4 ? (item[4].userEnteredValue?.stringValue ?? '') : '',
+                      );
                   posts.add(post);
                 } 
                 
@@ -358,7 +366,7 @@ class SheetRepositoryImpl implements SheetsRepository {
     List<PieChartVM> res = [];
 
     var data = await sheetsApi.spreadsheets.values.get(
-      dataSpread.spreadsheetId ?? '', '${sheetName}!A2:D',
+      dataSpread.spreadsheetId ?? '', '${sheetName}!A2:$endColumnLetter',
       majorDimension: 'ROWS',
     );
 

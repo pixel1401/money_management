@@ -12,6 +12,7 @@ TransactionForm _$TransactionFormFromJson(Map<String, dynamic> json) =>
       amount: json['amount'] as String?,
       category: json['category'] as String?,
       createCategory: json['createCategory'] as String?,
+      color: json['color'] as String?,
       time: TransactionForm._fromJson(json['time']),
       isCreateCategory: json['isCreateCategory'] as bool,
     );
@@ -22,6 +23,7 @@ Map<String, dynamic> _$TransactionFormToJson(TransactionForm instance) =>
       'amount': instance.amount,
       'category': instance.category,
       'createCategory': instance.createCategory,
+      'color': instance.color,
       'time': TransactionForm._toJson(instance.time),
       'isCreateCategory': instance.isCreateCategory,
     };

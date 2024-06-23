@@ -72,6 +72,8 @@ class SheetCubit extends Cubit<SheetState> {
 
       await getPieChartData();
 
+      // await getPostVer2();
+
       emit(state.startResponse(false));
     } catch (e) {
       throw ('ERROR INIT APIES', e);

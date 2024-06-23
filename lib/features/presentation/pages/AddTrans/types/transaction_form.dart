@@ -4,7 +4,7 @@ part 'transaction_form.g.dart';
 
 @JsonSerializable()
 class TransactionForm {
-  String? name, amount, category, createCategory;
+  String? name, amount, category, createCategory, color;
   @JsonKey(fromJson: _fromJson, toJson: _toJson)
   DateTime time;
   bool isCreateCategory;
@@ -14,6 +14,7 @@ class TransactionForm {
     this.amount,
     this.category,
     this.createCategory,
+    this.color,
     required this.time,
     required this.isCreateCategory,
   });

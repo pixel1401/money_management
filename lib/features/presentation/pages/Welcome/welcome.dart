@@ -57,7 +57,7 @@ class _WelcomePageState extends State<WelcomePage> {
                       Align(
                         alignment: Alignment.center,
                         child: Button(
-                          onPress: () {
+                          onPress: () async {
                               context.go('/');
                           },
                           text: 'Continue',

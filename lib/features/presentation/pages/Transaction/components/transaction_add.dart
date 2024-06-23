@@ -191,7 +191,7 @@ class TransactionStateAdd extends State<TransactionAdd> {
                       ),
                       Space(5),
                       Button(
-                          onPress: () {
+                          onPress: () async {
                             // _formKey.currentState?.saveAndValidate();
                             // debugPrint(_formKey.currentState?.value.toString());
 

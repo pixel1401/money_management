@@ -1,4 +1,6 @@
+import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' as Material;
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -24,6 +26,7 @@ class _CreateTransactionState extends State<CreateTransaction> {
 
   bool isCreateCategory = false;
   String dropdownValue = '';
+  Material.Color? pickColorForCategory;
 
   Future<void> handleSubmit(BuildContext context, TransactionForm data) async {
     final sheetState = context.read<SheetCubit>().state;
@@ -38,7 +41,8 @@ class _CreateTransactionState extends State<CreateTransaction> {
       'category': !isCreateCategory ? data.category : data.createCategory,
       'title': data.name,
       'time': data.time,
-      'amount': data.amount
+      'amount': data.amount,
+      'color': data.color,
     };
 
     for (var a in newData.values) {
@@ -94,7 +98,7 @@ class _CreateTransactionState extends State<CreateTransaction> {
                         ),
                         Space(0, 15),
                         SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.7,
+                          width: MediaQuery.of(context).size.width * 0.65,
                           child: FormBuilderTextField(
                             name: 'amount',
                             style: TextStyle(color: Colors.white, fontSize: 45),
@@ -193,6 +197,38 @@ class _CreateTransactionState extends State<CreateTransaction> {
                                   ),
                                 ],
                               ),
+                            Space(15),
+                            FormBuilderField(
+                              name: 'color',
+                              builder: (FormFieldState<dynamic> field) {
+                                return Row(
+                                  children: [
+                                    Container(
+                                      width: 50,
+                                      height: 50,
+                                      decoration: BoxDecoration(
+                                          color: pickColorForCategory,
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          border: Material.Border.all(
+                                              color: Colors.grey, width: 1)),
+                                    ),
+                                    Space(5, 10),
+                                    Button(
+                                        onPress: () async {
+                                          var pickColor =
+                                              await showColorPickerDialog(
+                                                  context, Colors.black);
+                                          setState(() {
+                                            pickColorForCategory = pickColor;
+                                          });
+                                          field.didChange(colorToHex(pickColor));
+                                        },
+                                        text: 'Pick color'),
+                                  ],
+                                );
+                              },
+                            ),
                             Space(15),
                             Input(
                               textInput: FormBuilderTextField(

@@ -24,13 +24,13 @@ class _AuthPageState extends State<AuthPage> {
           children: [
             Text("Google"),
             Button(
-              onPress: () {
+              onPress: () async {
                 signIn();
               },
               text: 'Sign in Google',
             ),
             Button(
-              onPress: () {
+              onPress: () async {
                 signOut();
               },
               text: 'Sign out',
