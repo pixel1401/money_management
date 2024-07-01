@@ -10,6 +10,7 @@ const APP_FILE_NAME = 'Money_Management';
 const QUERY_FILE = 'name="Money_Management" and trashed = false';
 
 const endColumnLetter = 'E';
+const int columnDate = 2; // Column for dates (C)
 
 class SheetRepositoryImpl implements SheetsRepository {
   // final SheetsApi client;
@@ -86,8 +87,9 @@ class SheetRepositoryImpl implements SheetsRepository {
     }
 
     for (var a in sheetNames) {
-      var data = await sheetsApi.spreadsheets.values
-          .get(dataSpread.spreadsheetId ?? '', a['sheetName'] + '!A:$endColumnLetter');
+      var data = await sheetsApi.spreadsheets.values.get(
+          dataSpread.spreadsheetId ?? '',
+          a['sheetName'] + '!A:$endColumnLetter');
       dataValueRange.add(SheetValueRange(
           sheetName: a['sheetName'],
           sheetId: a['sheetId'],
@@ -133,8 +135,8 @@ class SheetRepositoryImpl implements SheetsRepository {
     List<Post> posts = [];
 
     for (var a in sheetValueRange) {
-      var data = await sheetsApi.spreadsheets.values
-          .get(dataSpread.spreadsheetId ?? '', '${a.sheetName}!A2:$endColumnLetter');
+      var data = await sheetsApi.spreadsheets.values.get(
+          dataSpread.spreadsheetId ?? '', '${a.sheetName}!A2:$endColumnLetter');
       if (data.values != null) {
         for (var i = 0; i < (data.values ?? []).length; i++) {
           List wrap = (data.values ?? [])[i] as dynamic;
@@ -143,16 +145,15 @@ class SheetRepositoryImpl implements SheetsRepository {
               wrap[2] != null &&
               wrap[3] != null &&
               a.sheetId != null) {
-                
             Post post = Post(
-                index: i,
-                sheetId: a.sheetId!,
-                category: wrap[0],
-                name: wrap[1],
-                date: wrap[2],
-                amount: wrap[3] ,
-                color: wrap.length != 5 ? null : wrap[4] ,  
-                 );
+              index: i,
+              sheetId: a.sheetId!,
+              category: wrap[0],
+              name: wrap[1],
+              date: wrap[2],
+              amount: wrap[3],
+              color: wrap.length != 5 ? null : wrap[4],
+            );
             posts.add(post);
           }
         }
@@ -259,8 +260,7 @@ class SheetRepositoryImpl implements SheetsRepository {
 
   @override
   Future<num> getTotalPriceSheet(
-      {
-      required SheetsApi sheetsApi,
+      {required SheetsApi sheetsApi,
       required Spreadsheet dataSpread,
       required List<SheetValueRange> sheetsValueRange,
       required String sheetName,
@@ -288,14 +288,13 @@ class SheetRepositoryImpl implements SheetsRepository {
       DateTime? dateStart,
       DateTime? dateEnd,
       TimeRange? timeRange}) async {
-      
-      int requestCount = currentPage * pageSize;
+    int requestCount = currentPage * pageSize;
 
     BatchUpdateSpreadsheetRequest request = BatchUpdateSpreadsheetRequest(
-        requests: [],
-        includeSpreadsheetInResponse: true,
-        responseIncludeGridData: true,
-        // responseRanges: ['A${requestCount - 10 + 2}:D${requestCount+2}']
+      requests: [],
+      includeSpreadsheetInResponse: true,
+      responseIncludeGridData: true,
+      responseRanges: ['A2:$endColumnLetter'],
     );
 
     if (sheetId != null) {
@@ -307,7 +306,15 @@ class SheetRepositoryImpl implements SheetsRepository {
         sheetId: sheetId,
         startColumnIndex: 0,
         startRowIndex: 1,
-      ))));
+
+      ),
+      sortSpecs: [
+        SortSpec(
+          dimensionIndex: columnDate, 
+          sortOrder: "DESCENDING"
+        ),
+      ]
+      )));
     } else {
       for (SheetValueRange a in sheetValueRange) {
         request.requests!.add(Request(
@@ -326,30 +333,33 @@ class SheetRepositoryImpl implements SheetsRepository {
     if (data.updatedSpreadsheet?.sheets != null) {
       var sheets = data.updatedSpreadsheet?.sheets;
       if (sheets != null) {
-        var total = sheets.first.properties?.gridProperties?.columnCount; 
+        var total = sheets.first.properties?.gridProperties?.columnCount;
         List<Post> posts = [];
         for (var a in sheets) {
           var dataSheetId = a.properties?.sheetId;
-          if(a.data == null || dataSheetId == null) break;
+          if (a.data == null || dataSheetId == null) break;
           for (var rowData in a.data!) {
-            if(rowData.rowData == null) break;
-              for(var rowListIndex = 0; rowListIndex < rowData.rowData!.length; rowListIndex++) {
-                var item = rowData.rowData![rowListIndex].values;
+            if (rowData.rowData == null) break;
+            for (var rowListIndex = 0;
+                rowListIndex < rowData.rowData!.length;
+                rowListIndex++) {
+              var item = rowData.rowData![rowListIndex].values;
 
-                if((item?.length ?? 0) > 3 ) {
-                  Post post = Post(
-                      index: rowListIndex,
-                      sheetId: dataSheetId,
-                      category: item?[0].userEnteredValue?.stringValue ?? '',
-                      name: item?[1].userEnteredValue!.stringValue ?? '',
-                      date: item?[2].userEnteredValue!.stringValue ?? '',
-                      amount: item?[3].userEnteredValue!.stringValue ?? '',
-                      color: item!.length > 4 ? (item[4].userEnteredValue?.stringValue ?? '') : '',
-                      );
-                  posts.add(post);
-                } 
-                
+              if ((item?.length ?? 0) > 3) {
+                Post post = Post(
+                  index: rowListIndex,
+                  sheetId: dataSheetId,
+                  category: item?[0].userEnteredValue?.stringValue ?? '',
+                  name: item?[1].userEnteredValue!.stringValue ?? '',
+                  date: item?[2].userEnteredValue!.stringValue ?? '',
+                  amount: item?[3].userEnteredValue!.stringValue ?? '',
+                  color: item!.length > 4
+                      ? (item[4].userEnteredValue?.stringValue ?? '')
+                      : '',
+                );
+                posts.add(post);
               }
+            }
           }
         }
 
@@ -359,44 +369,46 @@ class SheetRepositoryImpl implements SheetsRepository {
 
     return PostsData(posts: [], total: 0, current: 0);
   }
-  
-  @override
-  Future<List<PieChartVM>> getPieChartData({required SheetsApi sheetsApi, required Spreadsheet dataSpread, required String sheetName}) async {
 
+  @override
+  Future<List<PieChartVM>> getPieChartData(
+      {required SheetsApi sheetsApi,
+      required Spreadsheet dataSpread,
+      required String sheetName}) async {
     List<PieChartVM> res = [];
 
     var data = await sheetsApi.spreadsheets.values.get(
-      dataSpread.spreadsheetId ?? '', '${sheetName}!A2:$endColumnLetter',
+      dataSpread.spreadsheetId ?? '',
+      '${sheetName}!A2:$endColumnLetter',
       majorDimension: 'ROWS',
     );
 
-    if(data.values == null) return [];
+    if (data.values == null) return [];
 
     Map<String, num> dataMap = {};
     num totalSum = 0;
 
-    for(var a in data.values!) {
-        // PieChartVM item;
-        if(a[0] != null && a[3] != null) {
-          num itemSum = (num.tryParse(a[3].toString()) ?? 0);
-          String itemTitle = a[0].toString();
+    for (var a in data.values!) {
+      // PieChartVM item;
+      if (a[0] != null && a[3] != null) {
+        num itemSum = (num.tryParse(a[3].toString()) ?? 0);
+        String itemTitle = a[0].toString();
 
-          if(dataMap.containsKey(itemTitle)) {
-            dataMap[a[0].toString()] = dataMap[itemTitle]! + itemSum;
-          } else {
-            dataMap[a[0].toString()] = itemSum;
-          }
-
-          totalSum += itemSum;
+        if (dataMap.containsKey(itemTitle)) {
+          dataMap[a[0].toString()] = dataMap[itemTitle]! + itemSum;
+        } else {
+          dataMap[a[0].toString()] = itemSum;
         }
+
+        totalSum += itemSum;
+      }
     }
 
     dataMap.forEach((key, value) {
-      res.add(PieChartVM(title: key, percent: ((value / totalSum) * 100).floor() ));
+      res.add(
+          PieChartVM(title: key, percent: ((value / totalSum) * 100).floor()));
     });
 
-
     return res;
-
   }
 }

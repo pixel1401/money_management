@@ -64,7 +64,7 @@ class TransactionStateAdd extends State<TransactionAdd> {
                     children: [
                       TextMy(
                         'Title',
-                        variant: TextMyVariant.h1,
+                        variant: TextMyVariant.title2,
                       ),
                       Space(5),
                       FormBuilderSwitch(

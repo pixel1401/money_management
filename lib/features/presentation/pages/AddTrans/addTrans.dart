@@ -93,7 +93,7 @@ class _CreateTransactionState extends State<CreateTransaction> {
                       children: [
                         TextMy(
                           '\$',
-                          variant: TextMyVariant.h1,
+                          variant: TextMyVariant.titleX,
                           style: TextStyle(color: Colors.white, fontSize: 55),
                         ),
                         Space(0, 15),

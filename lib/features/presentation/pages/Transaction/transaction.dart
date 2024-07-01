@@ -61,47 +61,69 @@ class _TransactionState extends State<Transaction> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<SheetCubit, SheetState>(builder: (context, state) {
-      List<Post> posts = state.posts ?? mockPosts;
+
+      List<Post> posts = mockPosts;
+      if(state.dataPosts == null) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      
       return Skeletonizer(
         enabled: !(state.isError == false &&
             state.isLoading == false &&
-            state.posts != null),
+            state.dataPosts != null),
         child: Column(
           children: [
             Expanded(
-              child: SizedBox(
-                child: ListView.builder(
-                  itemCount: posts.length, // items.length,
-                  itemBuilder: (context, index) {
-                    final item = posts[index];
-                    return Slidable(
-                      key: ValueKey(item.index),
-                      endActionPane: ActionPane(
-                        motion: const ScrollMotion(),
+              child: Column(
+                children: [
+                  if (state.dataPosts != null)
+                    ...state.dataPosts!.entries.map((item) {
+                      return Column(
                         children: [
-                          SlidableAction(
-                            onPressed: (context) {
-                              context.read<SheetCubit>().deleteSheetRow(
-                                  sheetId: item.sheetId, index: index);
-                            },
-                            backgroundColor: Color(0xFFFE4A49),
-                            foregroundColor: Colors.white,
-                            icon: Icons.delete,
-                            label: 'Delete',
-                          ),
+                          Text(item.key),
+                          _buildExo(item.value),
                         ],
-                      ),
-                      child: TransactionCard(
-                        post: item,
-                      ),
-                    );
-                  },
-                ),
+                      );
+                    }).toList()
+                ],
               ),
             ),
           ],
         ),
       );
     });
+  }
+
+  SizedBox _buildExo(List<Post> posts) {
+    return SizedBox(
+      child: Column(
+        children: [
+          ...posts.asMap().entries.map((item) {
+            return Slidable(
+            key: ValueKey(item.key),
+            endActionPane: ActionPane(
+              motion: const ScrollMotion(),
+              children: [
+                SlidableAction(
+                  onPressed: (context) {
+                    context
+                        .read<SheetCubit>()
+                        .deleteSheetRow(sheetId: item.value.sheetId, index: item.key);
+                  },
+                  backgroundColor: Color(0xFFFE4A49),
+                  foregroundColor: Colors.white,
+                  icon: Icons.delete,
+                  label: 'Delete',
+                ),
+              ],
+            ),
+            child: TransactionCard(
+              post: item.value,
+            ),
+          );
+          })
+        ],
+      )
+    );
   }
 }

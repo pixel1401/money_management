@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:money_management/config/theme/theme.dart';
 
-enum TextMyVariant { h1, h2, h3, h4, h5, h6, p }
+enum TextMyVariant { titleX , title1, title2, title3, regular1 , regular2, regular3, small , tiny }
 
 enum TextMyType {
   danger,
@@ -21,7 +21,7 @@ class TextMy extends StatelessWidget {
   final TextMyType? type;
   const TextMy(this.text,
       {super.key,
-      this.variant = TextMyVariant.p,
+      this.variant = TextMyVariant.regular2,
       this.style,
       this.type = TextMyType.info});
 
@@ -32,30 +32,37 @@ class TextMy extends StatelessWidget {
 
     switch (variant) {
       // BOLD
-      case TextMyVariant.h1:
-        res = textTheme.headlineMedium!.copyWith(color: textPrimary);
+      case TextMyVariant.titleX:
+        res = const TextStyle(fontSize: 64, fontWeight: FontWeight.bold, );
         break;
-      case TextMyVariant.h2:
-        res = const TextStyle(fontSize: 20, fontWeight: FontWeight.bold);
+      case TextMyVariant.title1:
+        res = const TextStyle(fontSize: 32, fontWeight: FontWeight.bold);
         break;
 
-      // SEMIBOLD
-      case TextMyVariant.h4:
-        res = const TextStyle(fontSize: 14, fontWeight: FontWeight.w600);
+      case TextMyVariant.title2:
+        res = const TextStyle(fontSize: 24, fontWeight: FontWeight.w600);
         break;
-      case TextMyVariant.h3:
-        res = textTheme.titleMedium!;
+      case TextMyVariant.title3:
+        res = const TextStyle(fontSize: 18, fontWeight: FontWeight.w600);
         break;
 
       // REGULAR
-      case TextMyVariant.h5:
+      case TextMyVariant.regular1:
+        res = const TextStyle(fontSize: 16, fontWeight: FontWeight.w500);
+        break;
+      case TextMyVariant.regular2:
+        res = const TextStyle(fontSize: 16, fontWeight: FontWeight.w400);
+        break;
+      case TextMyVariant.regular3:
         res = const TextStyle(fontSize: 14, fontWeight: FontWeight.w400);
         break;
-      case TextMyVariant.h6:
+      
+      // small
+      case TextMyVariant.small:
+        res = const TextStyle(fontSize: 13, fontWeight: FontWeight.w400);
+        break;
+      case TextMyVariant.tiny:
         res = const TextStyle(fontSize: 12, fontWeight: FontWeight.w400);
-        break;
-      case TextMyVariant.p:
-        res = const TextStyle(fontSize: 14, fontWeight: FontWeight.w400);
         break;
     }
 

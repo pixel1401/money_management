@@ -42,13 +42,13 @@ class TransactionCardState extends State<TransactionCard> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                TextMy(widget.post.category, variant: TextMyVariant.h3, type: TextMyType.secondary,),
-                TextMy('- ${widget.post.amount}' , variant: TextMyVariant.h4, type: TextMyType.danger,)
+                TextMy(widget.post.category, variant: TextMyVariant.regular1, type: TextMyType.secondary,),
+                TextMy('- ${widget.post.amount}' , variant: TextMyVariant.regular3, type: TextMyType.danger,)
               ],
             ),
             Row(
               children: [
-                TextMy(formattedDate, variant: TextMyVariant.h6,type: TextMyType.disabled, ),
+                TextMy(formattedDate, variant: TextMyVariant.small,type: TextMyType.disabled, ),
               ],
             )
           ],

@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:googleapis/sheets/v4.dart';
 import 'package:googleapis/drive/v3.dart';
 import 'package:googleapis_auth/googleapis_auth.dart';
+import 'package:intl/intl.dart';
 import 'package:money_management/core/helpers/types.dart';
 import 'package:money_management/features/domain/entity/post.dart';
 import 'package:money_management/features/domain/usecase/sheets/clear_empty_sheet_row_value_usecase.dart';
@@ -72,7 +73,7 @@ class SheetCubit extends Cubit<SheetState> {
 
       await getPieChartData();
 
-      // await getPostVer2();
+      await getPostVer2();
 
       emit(state.startResponse(false));
     } catch (e) {
@@ -171,7 +172,38 @@ class SheetCubit extends Cubit<SheetState> {
       dataSpread: state.spreadsheet!,
       sheetValueRange: state.sheetsValueRange!,
     ));
-    print(data);
+
+    Map<String, List<Post>> map = {};
+
+    DateTime today = DateTime.now();
+    DateTime yesterday = today.subtract(Duration(days: 1));
+
+    String formatDateKey(DateTime date) {
+      if (date.year == today.year &&
+          date.month == today.month &&
+          date.day == today.day) {
+        return "Сегодня";
+      } else if (date.year == yesterday.year &&
+          date.month == yesterday.month &&
+          date.day == yesterday.day) {
+        return "Вчера";
+      } else {
+        return DateFormat('dd/MM/yyyy').format(date); 
+      }
+    }
+
+    for (var item in data.posts) {
+      DateTime? date = DateTime.tryParse(item.date);
+
+      String dateKey = date != null ? formatDateKey(date) : item.date;
+
+      if (!map.containsKey(dateKey)) {
+        map[dateKey] = [];
+      }
+      map[dateKey]!.add(item);
+    }
+
+    emit(state.copyWith(dataPosts: map));
   }
 
   Future<num> getTotalPrice(
