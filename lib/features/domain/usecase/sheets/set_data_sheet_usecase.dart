@@ -13,12 +13,12 @@ class SetDataSheetParams {
   SetDataSheetParams({ required this.rows , required this.sheetsApi , required this.dataSpread , required this.sheetsValueRange});
 }
 
-class SetDataSheetUseCase implements UseCase<void, SetDataSheetParams> {
+class SetDataSheetUseCase implements UseCase<PostsData, SetDataSheetParams> {
   final SheetsRepository sheetsRepo;
   SetDataSheetUseCase({required this.sheetsRepo});
 
   @override
-  Future<void> call(SetDataSheetParams params) async {
+  Future<PostsData> call(SetDataSheetParams params) async {
     return await sheetsRepo.setDataSheet( rows: params.rows , sheetsValueRange: params.sheetsValueRange, dataSpread: params.dataSpread , sheetsApi: params.sheetsApi);
   }
 }

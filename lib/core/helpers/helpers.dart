@@ -4,21 +4,22 @@ import 'package:flutter/material.dart';
 
 class HexColor extends Color {
   static int _getColorFromHex(String hexColor) {
-    hexColor = hexColor.toUpperCase().replaceAll("#", "");
-    if (hexColor.length == 6) {
-      hexColor = "FF" + hexColor;
+    try {
+      hexColor = hexColor.toUpperCase().replaceAll("#", "");
+      if (hexColor.length == 6) {
+        hexColor = "FF" + hexColor;
+      }
+      return int.tryParse(hexColor, radix: 16) ?? 0xFF000000;
+    } catch (e) {
+      print('Error in HexColor: $e');
+      return 0xFF000000;
     }
-    return int.parse(hexColor, radix: 16);
   }
-
 
   HexColor(final String hexColor) : super(_getColorFromHex(hexColor));
 }
 
-
-
 String colorToHex(Color color) => '#${color.value.toRadixString(16)}';
-
 
 List<String> months = [
   'January',
@@ -52,7 +53,6 @@ SizedBox Space([double? heightArg, double? widthArg]) {
     width: widthArg,
   );
 }
-
 
 num calculateSum(List<dynamic> stringNumbers) {
   // Используем fold для эффективного суммирования

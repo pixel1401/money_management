@@ -40,8 +40,8 @@ class _WrapperState extends State<Wrapper> {
     return Scaffold(
       body: SafeArea(
         child: Container(
-          constraints:
-              BoxConstraints(maxHeight: MediaQuery.of(context).size.height),
+          // constraints:
+          //     BoxConstraints(maxHeight: MediaQuery.of(context).size.height),
           
           child: widget.child,
         ),

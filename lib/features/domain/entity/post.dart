@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:googleapis/sheets/v4.dart';
 
 class SheetValueRange extends ValueRange {
@@ -11,7 +12,7 @@ class SheetValueRange extends ValueRange {
       required int this.sheetId});
 }
 
-class Post {
+class Post extends Equatable {
   String category, name, date, amount;
   String? color;
   int index, sheetId;
@@ -23,6 +24,22 @@ class Post {
       required this.date,
       required this.amount,
       this.color});
+
+  @override
+  // TODO: implement props
+  List<Object?> get props => [
+        this.index,
+        this.sheetId,
+        this.category,
+        this.name,
+        this.date,
+        this.amount,
+        this.color
+      ];
+
+  @override
+  // TODO: implement stringify
+  bool? get stringify => true;
 }
 
 class PostsData {

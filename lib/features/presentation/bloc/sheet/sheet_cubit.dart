@@ -67,13 +67,12 @@ class SheetCubit extends Cubit<SheetState> {
       await getSpreadSheet();
       await getSheets();
       await getCategories();
-      await getPosts();
+      // await getPosts();
 
+      await getPostVer2();
       await getTotalPrice();
 
       await getPieChartData();
-
-      await getPostVer2();
 
       emit(state.startResponse(false));
     } catch (e) {
@@ -131,18 +130,19 @@ class SheetCubit extends Cubit<SheetState> {
   Future<void> deleteSheetRow(
       {required int sheetId, required int index}) async {
     emit(state.startResponse(true));
-    await deleteSheetRowUseCase.call(DeleteSheetRowParams(
+    var data = await deleteSheetRowUseCase.call(DeleteSheetRowParams(
       sheetId: sheetId,
       index: index,
       sheetsApi: state.sheetsApi!,
       dataSpread: state.spreadsheet!,
     ));
-    await getSheets();
+    var map = getMapData(data);
+
+    // await getSheets();
     await getCategories();
-    await getPosts();
     await getPieChartData();
     await getTotalPrice();
-    emit(state.startResponse(false));
+    emit(state.startResponse(false).copyWith(dataPosts: map));
   }
 
   Future<void> pushDataSpreadSheet({required List<RowData> rows}) async {
@@ -153,14 +153,16 @@ class SheetCubit extends Cubit<SheetState> {
       dataSpread: state.spreadsheet!,
       sheetsValueRange: state.sheetsValueRange!,
     ));
+    var map = getMapData(data);
 
-    await getSheets();
+    // await getSheets();
     await clearEmptySheetRowsValue();
     await getCategories();
-    await getPosts();
+    // await getPosts();
+    // await getPostVer2();
     await getPieChartData();
     await getTotalPrice();
-    emit(state.startResponse(false));
+    emit(state.startResponse(false).copyWith(dataPosts: map));
   }
 
   getPostVer2() async {
@@ -173,35 +175,7 @@ class SheetCubit extends Cubit<SheetState> {
       sheetValueRange: state.sheetsValueRange!,
     ));
 
-    Map<String, List<Post>> map = {};
-
-    DateTime today = DateTime.now();
-    DateTime yesterday = today.subtract(Duration(days: 1));
-
-    String formatDateKey(DateTime date) {
-      if (date.year == today.year &&
-          date.month == today.month &&
-          date.day == today.day) {
-        return "Сегодня";
-      } else if (date.year == yesterday.year &&
-          date.month == yesterday.month &&
-          date.day == yesterday.day) {
-        return "Вчера";
-      } else {
-        return DateFormat('dd/MM/yyyy').format(date); 
-      }
-    }
-
-    for (var item in data.posts) {
-      DateTime? date = DateTime.tryParse(item.date);
-
-      String dateKey = date != null ? formatDateKey(date) : item.date;
-
-      if (!map.containsKey(dateKey)) {
-        map[dateKey] = [];
-      }
-      map[dateKey]!.add(item);
-    }
+    Map<String, List<Post>> map = getMapData(data);
 
     emit(state.copyWith(dataPosts: map));
   }
@@ -231,5 +205,43 @@ class SheetCubit extends Cubit<SheetState> {
     ));
     emit(state.copyWith(pieChartData: data));
     return data;
+  }
+}
+
+Map<String, List<Post>> getMapData(PostsData data) {
+  Map<String, List<Post>> map = {};
+  try {
+    DateTime today = DateTime.now();
+    DateTime yesterday = today.subtract(Duration(days: 1));
+
+    String formatDateKey(DateTime date) {
+      if (date.year == today.year &&
+          date.month == today.month &&
+          date.day == today.day) {
+        return "Сегодня";
+      } else if (date.year == yesterday.year &&
+          date.month == yesterday.month &&
+          date.day == yesterday.day) {
+        return "Вчера";
+      } else {
+        return DateFormat('dd.MM.yyyy').format(date);
+      }
+    }
+
+    for (var item in data.posts) {
+      DateTime? date = DateTime.tryParse(item.date);
+
+      String dateKey = date != null ? formatDateKey(date) : item.date;
+
+      if (!map.containsKey(dateKey)) {
+        map[dateKey] = [];
+      }
+      map[dateKey]!.add(item);
+    }
+
+    return map;
+  } catch (e) {
+    print('Error in getMapData: $e');
+    return map;
   }
 }

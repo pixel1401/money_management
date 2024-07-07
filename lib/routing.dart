@@ -9,7 +9,7 @@ import 'package:money_management/features/presentation/pages/Welcome/welcome.dar
 import 'package:money_management/features/presentation/pages/wrapper.dart';
 
 import 'features/presentation/bloc/user/user_state.dart';
-import 'features/presentation/pages/AddTrans/addTrans.dart';
+import 'features/presentation/pages/AddTrans/create_trans.dart';
 import 'features/presentation/pages/Transaction/transaction.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();

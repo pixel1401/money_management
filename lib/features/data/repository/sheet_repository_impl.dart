@@ -12,6 +12,17 @@ const QUERY_FILE = 'name="Money_Management" and trashed = false';
 const endColumnLetter = 'E';
 const int columnDate = 2; // Column for dates (C)
 
+var sortForDate = (int sheetId) => SortRangeRequest(
+      range: GridRange(
+        sheetId: sheetId,
+        startColumnIndex: 0,
+        startRowIndex: 1,
+      ),
+      sortSpecs: [
+        SortSpec(dimensionIndex: columnDate, sortOrder: "DESCENDING"),
+      ],
+    );
+
 class SheetRepositoryImpl implements SheetsRepository {
   // final SheetsApi client;
 
@@ -52,7 +63,7 @@ class SheetRepositoryImpl implements SheetsRepository {
       Sheet(data: [
         GridData(rowData: [
           RowData(values: [
-            CellData(userEnteredValue: ExtendedValue(stringValue: "Category")),
+            CellData(userEnteredValue: ExtendedValue(stringValue: "Category875_2")),
             CellData(userEnteredValue: ExtendedValue(stringValue: "Name")),
             CellData(userEnteredValue: ExtendedValue(stringValue: "Date")),
             CellData(userEnteredValue: ExtendedValue(stringValue: "Amount")),
@@ -208,29 +219,37 @@ class SheetRepositoryImpl implements SheetsRepository {
   }
 
   @override
-  Future<void> deleteSheetRow(
+  Future<PostsData> deleteSheetRow(
       {required int sheetId,
       required int index,
       required SheetsApi sheetsApi,
       required Spreadsheet dataSpread}) async {
     Request requestsForDelete = Request(
-        deleteDimension: DeleteDimensionRequest(
-            range: DimensionRange(
-                sheetId: sheetId,
-                dimension: "ROWS",
-                startIndex: index + 1,
-                endIndex: index + 2)));
+      deleteDimension: DeleteDimensionRequest(
+        range: DimensionRange(
+            sheetId: sheetId,
+            dimension: "ROWS",
+            startIndex: index + 1,
+            endIndex: index + 2),
+      ),
+      sortRange: sortForDate(sheetId),
+    );
 
-    BatchUpdateSpreadsheetRequest request =
-        BatchUpdateSpreadsheetRequest(requests: [requestsForDelete]);
-    await sheetsApi.spreadsheets.batchUpdate(
+    BatchUpdateSpreadsheetRequest request = BatchUpdateSpreadsheetRequest(
+        requests: [requestsForDelete],
+        includeSpreadsheetInResponse: true,
+        responseIncludeGridData: true,
+        responseRanges: ['A2:$endColumnLetter']);
+    var data = await sheetsApi.spreadsheets.batchUpdate(
       request,
       dataSpread.spreadsheetId ?? '',
     );
+
+    return getPostData(data);
   }
 
   @override
-  Future<void> setDataSheet(
+  Future<PostsData> setDataSheet(
       {required List<RowData> rows,
       required SheetsApi sheetsApi,
       required Spreadsheet dataSpread,
@@ -239,23 +258,33 @@ class SheetRepositoryImpl implements SheetsRepository {
       if (a.sheetName == DateTime.now().year.toString()) {
         int rowIndexLast = a.values?.length ?? 0;
 
-        BatchUpdateSpreadsheetRequest request =
-            BatchUpdateSpreadsheetRequest(requests: [
-          Request(
+        BatchUpdateSpreadsheetRequest request = BatchUpdateSpreadsheetRequest(
+          requests: [
+            Request(
               updateCells: UpdateCellsRequest(
-            fields: "*",
-            start: GridCoordinate(
-                columnIndex: 0,
-                rowIndex: rowIndexLast,
-                sheetId: dataSpread.sheets?[0].properties?.sheetId),
-            rows: rows,
-          ))
-        ]);
+                fields: "*",
+                start: GridCoordinate(
+                    columnIndex: 0,
+                    rowIndex: rowIndexLast,
+                    sheetId: dataSpread.sheets?[0].properties?.sheetId),
+                rows: rows,
+              ),
+              // sortRange:
+              //     sortForDate(dataSpread.sheets?[0].properties?.sheetId ?? 0),
+            ),
+          ],
+          includeSpreadsheetInResponse: true,
+          responseIncludeGridData: true,
+          responseRanges: ['A2:$endColumnLetter'],
+        );
 
         var res = await sheetsApi.spreadsheets
             .batchUpdate(request, dataSpread.spreadsheetId ?? '', $fields: "*");
+
+        return getPostData(res);
       }
     }
+    return PostsData(posts: [], total: 0, current: 1);
   }
 
   @override
@@ -300,74 +329,25 @@ class SheetRepositoryImpl implements SheetsRepository {
     if (sheetId != null) {
       // int? endColumn = dataSpread.sheets!.firstWhere((element) => element.properties?.sheetId == sheetId).properties?.gridProperties?.columnCount;
 
-      request.requests!.add(Request(
-          sortRange: SortRangeRequest(
-              range: GridRange(
-        sheetId: sheetId,
-        startColumnIndex: 0,
-        startRowIndex: 1,
-
-      ),
-      sortSpecs: [
-        SortSpec(
-          dimensionIndex: columnDate, 
-          sortOrder: "DESCENDING"
+      request.requests!.add(
+        Request(
+          sortRange: sortForDate(sheetId),
         ),
-      ]
-      )));
+      );
     } else {
       for (SheetValueRange a in sheetValueRange) {
-        request.requests!.add(Request(
-            sortRange: SortRangeRequest(
-                range: GridRange(
-          sheetId: a.sheetId,
-          startColumnIndex: 0,
-          startRowIndex: 1,
-        ))));
+        request.requests!.add(
+          Request(
+            sortRange: sortForDate(a.sheetId!),
+          ),
+        );
       }
     }
 
     var data = await sheetsApi.spreadsheets
         .batchUpdate(request, dataSpread.spreadsheetId!);
 
-    if (data.updatedSpreadsheet?.sheets != null) {
-      var sheets = data.updatedSpreadsheet?.sheets;
-      if (sheets != null) {
-        var total = sheets.first.properties?.gridProperties?.columnCount;
-        List<Post> posts = [];
-        for (var a in sheets) {
-          var dataSheetId = a.properties?.sheetId;
-          if (a.data == null || dataSheetId == null) break;
-          for (var rowData in a.data!) {
-            if (rowData.rowData == null) break;
-            for (var rowListIndex = 0;
-                rowListIndex < rowData.rowData!.length;
-                rowListIndex++) {
-              var item = rowData.rowData![rowListIndex].values;
-
-              if ((item?.length ?? 0) > 3) {
-                Post post = Post(
-                  index: rowListIndex,
-                  sheetId: dataSheetId,
-                  category: item?[0].userEnteredValue?.stringValue ?? '',
-                  name: item?[1].userEnteredValue!.stringValue ?? '',
-                  date: item?[2].userEnteredValue!.stringValue ?? '',
-                  amount: item?[3].userEnteredValue!.stringValue ?? '',
-                  color: item!.length > 4
-                      ? (item[4].userEnteredValue?.stringValue ?? '')
-                      : '',
-                );
-                posts.add(post);
-              }
-            }
-          }
-        }
-
-        return PostsData(posts: posts, total: total ?? 0, current: currentPage);
-      }
-    }
-
-    return PostsData(posts: [], total: 0, current: 0);
+    return getPostData(data, current: currentPage);
   }
 
   @override
@@ -410,5 +390,52 @@ class SheetRepositoryImpl implements SheetsRepository {
     });
 
     return res;
+  }
+}
+
+PostsData getPostData(BatchUpdateSpreadsheetResponse data, {int? current}) {
+  try {
+    if (data.updatedSpreadsheet?.sheets != null) {
+      var sheets = data.updatedSpreadsheet?.sheets;
+      if (sheets != null) {
+        var total = sheets.first.properties?.gridProperties?.columnCount;
+        List<Post> posts = [];
+        for (var a in sheets) {
+          var dataSheetId = a.properties?.sheetId;
+          if (a.data == null || dataSheetId == null) break;
+          for (var rowData in a.data!) {
+            if (rowData.rowData == null) break;
+            for (var rowListIndex = 0;
+                rowListIndex < rowData.rowData!.length;
+                rowListIndex++) {
+              var item = rowData.rowData![rowListIndex].values;
+
+              if ((item?.length ?? 0) > 3) {
+                Post post = Post(
+                  index: rowListIndex,
+                  sheetId: dataSheetId,
+                  category: item?[0].userEnteredValue?.stringValue ?? '',
+                  name: item?[1].userEnteredValue!.stringValue ?? '',
+                  date: item?[2].userEnteredValue!.stringValue ?? '',
+                  amount: item?[3].userEnteredValue!.stringValue ?? '',
+                  color: item!.length > 4
+                      ? (item[4].userEnteredValue?.stringValue)
+                      : null,
+                );
+                posts.add(post);
+              }
+            }
+          }
+        }
+
+        return PostsData(
+            posts: posts, total: total ?? 0, current: current ?? 1);
+      }
+    }
+
+    return PostsData(posts: [], total: 0, current: 0);
+  } catch (e) {
+    print('Error in getPostData: $e');
+    return PostsData(posts: [], total: 0, current: 0);
   }
 }

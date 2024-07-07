@@ -43,7 +43,7 @@ Color light (ColorOpacity? value) {
 }
 
 
-Color violet (ColorOpacity? value) {
+Color violet ([ColorOpacity? value]) {
 
   Map<ColorOpacity, Color> data = {
     ColorOpacity.twenty: HexColor('#EEE5FF'),
@@ -56,7 +56,7 @@ Color violet (ColorOpacity? value) {
   return data[value] ?? data[ColorOpacity.hundred]!;
 }
 
-Color red (ColorOpacity? value) {
+Color red ([ColorOpacity? value]) {
   Map<ColorOpacity, Color> data = {
     ColorOpacity.twenty: HexColor('#FDD5D7'),
     ColorOpacity.forty: HexColor('#FDA2A9'),
@@ -80,7 +80,7 @@ Color green (ColorOpacity? value) {
   return data[value] ?? data[ColorOpacity.hundred]!;
 }
 
-Color yellow (ColorOpacity? value) {
+Color yellow ([ColorOpacity? value]) {
   Map<ColorOpacity, Color> data = {
     ColorOpacity.twenty: HexColor('#FCEED4'),
     ColorOpacity.forty: HexColor('#FCDDA1'),

@@ -31,13 +31,13 @@ abstract class SheetsRepository {
       {required SheetsApi sheetsApi,
       required Spreadsheet dataSpread,
       required List<SheetValueRange> sheetsValueRange});
-  Future<void> deleteSheetRow(
+  Future<PostsData> deleteSheetRow(
       {required int sheetId,
       required int index,
       required SheetsApi sheetsApi,
       required Spreadsheet dataSpread});
 
-  Future<void> setDataSheet(
+  Future<PostsData> setDataSheet(
       {required List<RowData> rows,
       required SheetsApi sheetsApi,
       required Spreadsheet dataSpread,
