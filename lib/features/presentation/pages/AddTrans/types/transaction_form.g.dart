@@ -24,6 +24,6 @@ Map<String, dynamic> _$TransactionFormToJson(TransactionForm instance) =>
       'category': instance.category,
       'createCategory': instance.createCategory,
       'color': instance.color,
-      'time': TransactionForm._toJson(instance.time),
+      'time': instance.time.toIso8601String(),
       'isCreateCategory': instance.isCreateCategory,
     };

@@ -12,11 +12,11 @@ import 'package:money_management/features/domain/usecase/sheets/delete_sheet_row
 import 'package:money_management/features/domain/usecase/sheets/drive_init_usecase.dart';
 import 'package:money_management/features/domain/usecase/sheets/get_categories_usecase.dart';
 import 'package:money_management/features/domain/usecase/sheets/get_posts_sort_date_usecase.dart';
-import 'package:money_management/features/domain/usecase/sheets/get_posts_usecase.dart';
 import 'package:money_management/features/domain/usecase/sheets/get_sheets_usecase.dart';
 import 'package:money_management/features/domain/usecase/sheets/get_spreadsheet_usecase.dart';
 import 'package:money_management/features/domain/usecase/sheets/set_data_sheet_usecase.dart';
 import 'package:money_management/features/domain/usecase/sheets/sheets_init_usecase.dart';
+import 'package:money_management/features/domain/usecase/sheets/update_data_sheet_usecase.dart';
 import 'package:money_management/features/domain/usecase/user_authenticated_client_usecase.dart';
 import 'package:money_management/features/domain/usecase/user_is_auth_usecase.dart';
 import 'package:money_management/features/domain/usecase/user_sign_in_usecase.dart';
@@ -56,11 +56,11 @@ Future<void> init() async {
   sl.registerLazySingleton(() => CreateSpreadSheetUseCase(sheetsRepo: sl()));
   sl.registerLazySingleton(() => GetSheetsUseCase(sheetsRepo: sl()));
   sl.registerLazySingleton(() => GetCategoriesUseCase(sheetsRepo: sl()));
-  sl.registerLazySingleton(() => GetPostsUseCase(sheetsRepo: sl()));
   sl.registerLazySingleton(
       () => ClearEmptySheetRowsValueUseCase(sheetsRepo: sl()));
   sl.registerLazySingleton(() => DeleteSheetRowUseCase(sheetsRepo: sl()));
   sl.registerLazySingleton(() => SetDataSheetUseCase(sheetsRepo: sl()));
+  sl.registerLazySingleton(() => UpdateDataSheetUseCase(sheetsRepo: sl()));
   sl.registerFactory(() => GetPostsSortDateUsecase(sheetsRepo: sl()));
   sl.registerFactory(() => GetTotalPriceSheetUsecase(sheetsRepo: sl()));
 
@@ -84,8 +84,8 @@ Future<void> init() async {
         clearEmptySheetRowsValueUseCase: sl(),
         deleteSheetRowUseCase: sl(),
         getCategoriesUseCase: sl(),
-        getPostsUseCase: sl(),
         createSpreadSheetUseCase: sl(),
+        updateDataSheetUseCase: sl(),
         getSheetsUseCase: sl(),
         setDataSheetUseCase: sl(),
         getPostsSortDateUsecase: sl(),

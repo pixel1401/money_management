@@ -19,13 +19,6 @@ abstract class SheetsRepository {
       required Spreadsheet dataSpread,
       required List<SheetValueRange> sheetValueRange});
 
-  Future<List<Post>> getPosts(
-      {required SheetsApi sheetsApi,
-      required Spreadsheet dataSpread,
-      required List<SheetValueRange> sheetValueRange,
-      DateTime? dateStart,
-      DateTime? dateEnd,
-      TimeRange? timeRange});
 
   Future<bool> clearEmptySheetRowsValue(
       {required SheetsApi sheetsApi,
@@ -42,6 +35,14 @@ abstract class SheetsRepository {
       required SheetsApi sheetsApi,
       required Spreadsheet dataSpread,
       required List<SheetValueRange> sheetsValueRange});
+    
+  Future<PostsData> updateDataSheet(
+      {required List<RowData> rows,
+      required SheetsApi sheetsApi,
+      required Spreadsheet dataSpread,
+      required int indexPost,
+      required List<SheetValueRange> sheetsValueRange});
+
 
   Future<num> getTotalPriceSheet(
       {required SheetsApi sheetsApi,

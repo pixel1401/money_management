@@ -11,7 +11,8 @@ import '../types/transaction_form.dart';
 
 class BodyForm extends StatefulWidget {
   final GlobalKey<FormBuilderState> formKey;
-  final Future<void> Function(BuildContext context, TransactionForm data) handleSubmit;
+  final Future<void> Function(BuildContext context, TransactionForm data)
+      handleSubmit;
   final bool isCreateCategory;
   final String dropdownValue;
   final Function onIsCreateCategory;
@@ -32,12 +33,22 @@ class BodyForm extends StatefulWidget {
 class _BodyFormState extends State<BodyForm> {
   Color? pickColorForCategory;
 
+
+  @override
+  void initState() {
+    super.initState();
+    String? postColor = widget.formKey.currentState?.initialValue['color'];
+    if(postColor != null){
+      pickColorForCategory = HexColor(postColor);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
         width: double.infinity,
-        padding: EdgeInsets.only(top: 30, left: 15, right: 15),
+        padding: EdgeInsets.only(top: 25, left: 15, right: 15),
         decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.only(
@@ -65,7 +76,7 @@ class _BodyFormState extends State<BodyForm> {
                   if (!widget.isCreateCategory)
                     Column(
                       children: [
-                        Space(15),
+                        Space(5),
                         Input(
                           dropdown: FormBuilderDropdown<String>(
                             name: 'category',

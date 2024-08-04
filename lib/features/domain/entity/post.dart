@@ -13,7 +13,8 @@ class SheetValueRange extends ValueRange {
 }
 
 class Post extends Equatable {
-  String category, name, date, amount;
+  String date;
+  String category, name, amount;
   String? color;
   int index, sheetId;
   Post(
@@ -23,18 +24,19 @@ class Post extends Equatable {
       required this.name,
       required this.date,
       required this.amount,
-      this.color});
+      this.color,
+      });
 
   @override
   // TODO: implement props
   List<Object?> get props => [
-        this.index,
-        this.sheetId,
-        this.category,
-        this.name,
-        this.date,
-        this.amount,
-        this.color
+        index,
+        sheetId,
+        category,
+        name,
+        date,
+        amount,
+        color
       ];
 
   @override

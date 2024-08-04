@@ -2,7 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:googleapis/sheets/v4.dart';
 import 'package:googleapis/drive/v3.dart';
 import 'package:googleapis_auth/googleapis_auth.dart';
-import 'package:intl/intl.dart';
+import 'package:money_management/core/helpers/helpers.dart';
 import 'package:money_management/core/helpers/types.dart';
 import 'package:money_management/features/domain/entity/post.dart';
 import 'package:money_management/features/domain/usecase/sheets/clear_empty_sheet_row_value_usecase.dart';
@@ -12,12 +12,12 @@ import 'package:money_management/features/domain/usecase/sheets/drive_init_useca
 import 'package:money_management/features/domain/usecase/sheets/get_categories_usecase.dart';
 import 'package:money_management/features/domain/usecase/sheets/get_pie_chart_usecase.dart';
 import 'package:money_management/features/domain/usecase/sheets/get_posts_sort_date_usecase.dart';
-import 'package:money_management/features/domain/usecase/sheets/get_posts_usecase.dart';
 import 'package:money_management/features/domain/usecase/sheets/get_sheets_usecase.dart';
 import 'package:money_management/features/domain/usecase/sheets/get_spreadsheet_usecase.dart';
 import 'package:money_management/features/domain/usecase/sheets/get_total_price_sheet_usecase.dart';
 import 'package:money_management/features/domain/usecase/sheets/set_data_sheet_usecase.dart';
 import 'package:money_management/features/domain/usecase/sheets/sheets_init_usecase.dart';
+import 'package:money_management/features/domain/usecase/sheets/update_data_sheet_usecase.dart';
 
 part 'sheet_state.dart';
 
@@ -29,15 +29,13 @@ class SheetCubit extends Cubit<SheetState> {
   CreateSpreadSheetUseCase createSpreadSheetUseCase;
   GetSheetsUseCase getSheetsUseCase;
   GetCategoriesUseCase getCategoriesUseCase;
-  GetPostsUseCase getPostsUseCase;
   ClearEmptySheetRowsValueUseCase clearEmptySheetRowsValueUseCase;
   DeleteSheetRowUseCase deleteSheetRowUseCase;
   SetDataSheetUseCase setDataSheetUseCase;
   GetPostsSortDateUsecase getPostsSortDateUsecase;
-
   GetTotalPriceSheetUsecase getTotalPriceSheetUsecase;
-
   GetPieChartUseCase getPieChartUseCase;
+  UpdateDataSheetUseCase updateDataSheetUseCase;
 
   SheetCubit(
       {required this.sheetInitUseCase,
@@ -46,10 +44,10 @@ class SheetCubit extends Cubit<SheetState> {
       required this.createSpreadSheetUseCase,
       required this.getSheetsUseCase,
       required this.getCategoriesUseCase,
-      required this.getPostsUseCase,
       required this.clearEmptySheetRowsValueUseCase,
       required this.deleteSheetRowUseCase,
       required this.setDataSheetUseCase,
+      required this.updateDataSheetUseCase,
       required this.getPostsSortDateUsecase,
       required this.getTotalPriceSheetUsecase,
       required this.getPieChartUseCase})
@@ -67,11 +65,8 @@ class SheetCubit extends Cubit<SheetState> {
       await getSpreadSheet();
       await getSheets();
       await getCategories();
-      // await getPosts();
-
-      await getPostVer2();
+      await getPost();
       await getTotalPrice();
-
       await getPieChartData();
 
       emit(state.startResponse(false));
@@ -94,14 +89,6 @@ class SheetCubit extends Cubit<SheetState> {
     emit(state.copyWith(sheetsValueRange: sheets));
   }
 
-  Future<void> getPosts() async {
-    var posts = await getPostsUseCase.call(GetPostsParams(
-      sheetsApi: state.sheetsApi!,
-      dataSpread: state.spreadsheet!,
-      sheetValueRange: state.sheetsValueRange!,
-    ));
-    emit(state.copyWith(posts: posts));
-  }
 
   //? Получение spreadsheet / если нет создание
   Future<void> getSpreadSheet() async {
@@ -138,7 +125,6 @@ class SheetCubit extends Cubit<SheetState> {
     ));
     var map = getMapData(data);
 
-    // await getSheets();
     await getCategories();
     await getPieChartData();
     await getTotalPrice();
@@ -155,17 +141,34 @@ class SheetCubit extends Cubit<SheetState> {
     ));
     var map = getMapData(data);
 
-    // await getSheets();
     await clearEmptySheetRowsValue();
     await getCategories();
-    // await getPosts();
-    // await getPostVer2();
     await getPieChartData();
     await getTotalPrice();
     emit(state.startResponse(false).copyWith(dataPosts: map));
   }
 
-  getPostVer2() async {
+  Future<void> updatePost ({required List<RowData> rows , required int indexPost}) async {
+    emit(state.startResponse(true));
+    var data = await updateDataSheetUseCase.call(UpdateDataSheetParams(
+      rows: rows,
+      sheetsApi: state.sheetsApi!,
+      dataSpread: state.spreadsheet!,
+      indexPost: indexPost,
+      sheetsValueRange: state.sheetsValueRange!,
+    ));
+    var map = getMapData(data);
+
+    await clearEmptySheetRowsValue();
+    await getCategories();
+    await getPieChartData();
+    await getTotalPrice();
+    emit(state.startResponse(false).copyWith(dataPosts: map));
+  }
+
+
+
+  getPost() async {
     if (state.sheetsApi == null &&
         state.spreadsheet == null &&
         state.sheetsValueRange == null) return;
@@ -190,7 +193,7 @@ class SheetCubit extends Cubit<SheetState> {
       dateStart: dateStart,
       dateEnd: dateEnd,
       timeRange: timeRange,
-      sheetName: '2024',
+      sheetName: DateTime.now().year.toString(),
     ));
     emit(state.copyWith(totalPrice: data));
     return data;
@@ -201,47 +204,11 @@ class SheetCubit extends Cubit<SheetState> {
     var data = await getPieChartUseCase.call(GetPieChartUseCaseParams(
       dataSpread: state.spreadsheet!,
       sheetsApi: state.sheetsApi!,
-      sheetName: '2024',
+      sheetName: DateTime.now().year.toString(),
     ));
     emit(state.copyWith(pieChartData: data));
     return data;
   }
 }
 
-Map<String, List<Post>> getMapData(PostsData data) {
-  Map<String, List<Post>> map = {};
-  try {
-    DateTime today = DateTime.now();
-    DateTime yesterday = today.subtract(Duration(days: 1));
 
-    String formatDateKey(DateTime date) {
-      if (date.year == today.year &&
-          date.month == today.month &&
-          date.day == today.day) {
-        return "Сегодня";
-      } else if (date.year == yesterday.year &&
-          date.month == yesterday.month &&
-          date.day == yesterday.day) {
-        return "Вчера";
-      } else {
-        return DateFormat('dd.MM.yyyy').format(date);
-      }
-    }
-
-    for (var item in data.posts) {
-      DateTime? date = DateTime.tryParse(item.date);
-
-      String dateKey = date != null ? formatDateKey(date) : item.date;
-
-      if (!map.containsKey(dateKey)) {
-        map[dateKey] = [];
-      }
-      map[dateKey]!.add(item);
-    }
-
-    return map;
-  } catch (e) {
-    print('Error in getMapData: $e');
-    return map;
-  }
-}

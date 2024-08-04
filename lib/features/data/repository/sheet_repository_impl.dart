@@ -63,7 +63,7 @@ class SheetRepositoryImpl implements SheetsRepository {
       Sheet(data: [
         GridData(rowData: [
           RowData(values: [
-            CellData(userEnteredValue: ExtendedValue(stringValue: "Category875_2")),
+            CellData(userEnteredValue: ExtendedValue(stringValue: "Category")),
             CellData(userEnteredValue: ExtendedValue(stringValue: "Name")),
             CellData(userEnteredValue: ExtendedValue(stringValue: "Date")),
             CellData(userEnteredValue: ExtendedValue(stringValue: "Amount")),
@@ -133,45 +133,6 @@ class SheetRepositoryImpl implements SheetsRepository {
     }
 
     return categories;
-  }
-
-  @override
-  Future<List<Post>> getPosts(
-      {required SheetsApi sheetsApi,
-      required Spreadsheet dataSpread,
-      required List<SheetValueRange> sheetValueRange,
-      DateTime? dateStart,
-      DateTime? dateEnd,
-      TimeRange? timeRange}) async {
-    List<Post> posts = [];
-
-    for (var a in sheetValueRange) {
-      var data = await sheetsApi.spreadsheets.values.get(
-          dataSpread.spreadsheetId ?? '', '${a.sheetName}!A2:$endColumnLetter');
-      if (data.values != null) {
-        for (var i = 0; i < (data.values ?? []).length; i++) {
-          List wrap = (data.values ?? [])[i] as dynamic;
-          if (wrap[0] != null &&
-              wrap[1] != null &&
-              wrap[2] != null &&
-              wrap[3] != null &&
-              a.sheetId != null) {
-            Post post = Post(
-              index: i,
-              sheetId: a.sheetId!,
-              category: wrap[0],
-              name: wrap[1],
-              date: wrap[2],
-              amount: wrap[3],
-              color: wrap.length != 5 ? null : wrap[4],
-            );
-            posts.add(post);
-          }
-        }
-      }
-    }
-
-    return posts;
   }
 
   @override
@@ -269,9 +230,11 @@ class SheetRepositoryImpl implements SheetsRepository {
                     sheetId: dataSpread.sheets?[0].properties?.sheetId),
                 rows: rows,
               ),
-              // sortRange:
-              //     sortForDate(dataSpread.sheets?[0].properties?.sheetId ?? 0),
             ),
+            Request(
+              sortRange:
+                  sortForDate(dataSpread.sheets?[0].properties?.sheetId ?? 0),
+            )
           ],
           includeSpreadsheetInResponse: true,
           responseIncludeGridData: true,
@@ -390,6 +353,48 @@ class SheetRepositoryImpl implements SheetsRepository {
     });
 
     return res;
+  }
+
+  @override
+  Future<PostsData> updateDataSheet(
+      {required List<RowData> rows,
+      required SheetsApi sheetsApi,
+      required Spreadsheet dataSpread,
+      required int indexPost,
+      required List<SheetValueRange> sheetsValueRange}) async {
+    for (var a in sheetsValueRange!) {
+      if (a.sheetName == DateTime.now().year.toString()) {
+
+        BatchUpdateSpreadsheetRequest request = BatchUpdateSpreadsheetRequest(
+          requests: [
+            Request(
+              updateCells: UpdateCellsRequest(
+                fields: "*",
+                start: GridCoordinate(
+                    columnIndex: 0,
+                    rowIndex: indexPost + 1,
+                    sheetId: dataSpread.sheets?[0].properties?.sheetId),
+                rows: rows,
+              ),
+            ),
+            Request(
+              sortRange:
+                  sortForDate(dataSpread.sheets?[0].properties?.sheetId ?? 0),
+            )
+          ],
+          includeSpreadsheetInResponse: true,
+          responseIncludeGridData: true,
+          responseRanges: ['A2:$endColumnLetter'],
+        );
+
+        var res = await sheetsApi.spreadsheets
+            .batchUpdate(request, dataSpread.spreadsheetId ?? '', $fields: "*");
+
+        return getPostData(res);
+      }
+    }
+    return PostsData(posts: [], total: 0, current: 1);
+
   }
 }
 

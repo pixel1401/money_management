@@ -1,6 +1,8 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:money_management/features/domain/entity/post.dart';
 
 class HexColor extends Color {
   static int _getColorFromHex(String hexColor) {
@@ -61,4 +63,43 @@ num calculateSum(List<dynamic> stringNumbers) {
     double number = double.tryParse(element) ?? 0.0;
     return previousValue + number;
   });
+}
+
+
+Map<String, List<Post>> getMapData(PostsData data) {
+  Map<String, List<Post>> map = {};
+  try {
+    DateTime today = DateTime.now();
+    DateTime yesterday = today.subtract(Duration(days: 1));
+
+    String formatDateKey(DateTime date) {
+      if (date.year == today.year &&
+          date.month == today.month &&
+          date.day == today.day) {
+        return "Сегодня";
+      } else if (date.year == yesterday.year &&
+          date.month == yesterday.month &&
+          date.day == yesterday.day) {
+        return "Вчера";
+      } else {
+        return DateFormat('dd.MM.yyyy').format(date);
+      }
+    }
+
+    for (var item in data.posts) {
+      DateTime? date = DateTime.tryParse(item.date);
+
+      String dateKey = date != null ? formatDateKey(date) : item.date;
+
+      if (!map.containsKey(dateKey)) {
+        map[dateKey] = [];
+      }
+      map[dateKey]!.add(item);
+    }
+
+    return map;
+  } catch (e) {
+    print('Error in getMapData: $e');
+    return map;
+  }
 }

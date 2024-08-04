@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:money_management/features/domain/entity/post.dart';
 import 'package:money_management/features/presentation/bloc/user/user_cubit.dart';
+import 'package:money_management/features/presentation/pages/AddTrans/edit_trans.dart';
 import 'package:money_management/features/presentation/pages/Auth/auth.dart';
 import 'package:money_management/features/presentation/pages/Home/home.dart';
 import 'package:money_management/features/presentation/pages/Transaction/components/transaction_add.dart';
@@ -45,6 +47,13 @@ final GoRouter router = GoRouter(
         path: '/transaction/add',
         pageBuilder: (context, state) => NoTransitionPage<void>(
             key: state.pageKey, child: const CreateTransaction()),
+      ),
+      GoRoute(
+        path: '/transaction/edit',
+        pageBuilder: (context, state)  {
+          Post post = state.extra as Post;
+          return NoTransitionPage<void>(
+            key: state.pageKey, child:  EditTransaction(data: post,));},
       ),
       GoRoute(
         path: '/welcome',

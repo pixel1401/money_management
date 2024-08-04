@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:go_router/go_router.dart';
 import 'package:money_management/config/theme/theme.dart';
 import 'package:money_management/features/domain/entity/post.dart';
 import 'package:money_management/features/presentation/bloc/sheet/sheet_cubit.dart';
@@ -122,7 +123,7 @@ class _TransactionState extends State<Transaction> {
               children: [
                 SlidableAction(
                   onPressed: (context) {
-                    
+                    context.go('/transaction/edit', extra: item.value);
                   },
                   backgroundColor: yellow(ColorOpacity.sixty),
                   foregroundColor: Colors.white,
